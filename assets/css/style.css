@@ -23,7 +23,7 @@ h4
     font-family: sans-serif;
     font-weight: bold;
     font-size: 20px;
-    color: #070707;
+    color: #ffffff;
     text-align: left;
     margin-bottom: 20px;
 }
@@ -105,6 +105,17 @@ footer
 }
 
 .this-span
+{
+    height: 30px;
+    width: 30px;
+    background-color: black;
+    border: 1px solid #666666;
+    display: inline-block;
+    text-align: center;
+    padding-top: 12px;
+}
+
+.next-span
 {
     height: 30px;
     width: 30px;

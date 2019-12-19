@@ -1,7 +1,6 @@
 /************************************ Output Object Structure ************************************/
 
 //Game status:
-//IDLE  - the game has not started.
 //PLAY  - the game is being played.
 //PAUSE - the game has been paused by the user.
 //WAIT  - the game is waiting for a continue signal. used for animation delays.
@@ -13,13 +12,15 @@
 //REJECT - last request was rejected. Piece cannot be spun because it it blocked, for example.
 
 //Current level - increases every 10 lines.
-//Current piece
-//Next piece
 //Current score
 //Lines cleared
 //Rows to erase - an array of rows to erase. Should only have values when status = WAIT.
+
 //Piece Y position
 //Piece X position
+//Piece current
+//Piece rotation
+//Piece next
 
 //Recommended colors:
 //An array of 5 colors recommended for rendering. Classic NES Tetris colors. 0 is always black.
@@ -32,18 +33,20 @@
 /************************************ Input Object Structure *************************************/
 
 //Game requests:
-//NONE      - used when only adding lines to bottom.
+//NONE      - get current status. 0 = return object, 1 = use callback.
 //ROTATECW  - rotate piece clockwise.
 //ROTATECCW - rotate piece counter clockwise.
 //LEFT      - move piece left.
 //RIGHT     - move piece right.
 //DOWN      - move piece down.
-//PAUSE     - pause the game.
+//PAUSE     - toggle pause game.
 //RESUME    - resume the game when engine is waiting.
+//ADD_LINES - add lines to bottom of game field. param is number of lines to add.
+//RESET     - reset the game. param is level to start on.
+//RESEED    - reset the seed for the RNG. param is the new seed.
 
-//addLines:
-//Add a number of lines to add when next piece starts.  Can be less than 1. Once the value is
-//greater than 1, the lines will be added and the remainder saved.
+//param:
+//Varies in function. See above.
 
 /***************************************** Color Schemes *****************************************/
 
@@ -105,21 +108,23 @@
 class NTEngine
 {
     //Game status.
-    static get GS_IDLE()  { return 0 };
+    static get GS_OVER()  { return 0 };
     static get GS_PLAY()  { return 1 };
     static get GS_PAUSE() { return 2 };
     static get GS_WAIT()  { return 3 };
-    static get GS_OVER()  { return 4 };
 
     //Game requests.
-    static get GR_NONE()      { return 0 };
-    static get GR_ROTATECW()  { return 1 };
-    static get GR_ROTATECCW() { return 2 };
-    static get GR_LEFT()      { return 3 };
-    static get GR_RIGHT()     { return 4 };
-    static get GR_DOWN()      { return 5 };
-    static get GR_PAUSE()     { return 6 };
-    static get GR_RESUME()    { return 7 };
+    static get GR_NONE()       { return 0 };
+    static get GR_ROTATE_CW()  { return 1 };
+    static get GR_ROTATE_CCW() { return 2 };
+    static get GR_LEFT()       { return 3 };
+    static get GR_RIGHT()      { return 4 };
+    static get GR_DOWN()       { return 5 };
+    static get GR_PAUSE()      { return 6 };
+    static get GR_RESUME()     { return 7 };
+    static get GR_ADD_LINES()  { return 8 };
+    static get GR_RESET()      { return 9 };
+    static get GR_RESEED()     { return 10 };
 
     //Last request status
     static get LRS_NONE()   { return 0 };
@@ -135,9 +140,8 @@ class NTEngine
     static get PIECE_L()   { return 5 };
     static get PIECE_I()   { return 6 };
 
-    constructor(startLevel, rndSeed, statusCallback)
+    constructor(rndSeed, statusCallback)
     {
-        this.startLevel     = startLevel;
         this.rndSeed        = rndSeed;
         this.statusCallback = statusCallback;
 
@@ -146,18 +150,25 @@ class NTEngine
         this.ntRandom(this.rndSeed);
         this.ntNext();
 
+        //Interval timer.
+        this.timer;
+
         //Game engine variables.
-        this.gameStatus = NTEngine.GS_IDLE;
+        this.gameStatus = NTEngine.GS_OVER;
         this.lastRequestStatus = NTEngine.LRS_NONE;
-        this.currentLevel = startLevel;
-        this.currentPiece = this.ntNext();
-        this.nextPiece = this.ntNext();
+        this.currentLevel = 0;
         this.currentScore = 0;
         this.linesCleared = 0;
-        this.rowsToErase = 0;
+        this.rowsToErase = [];
+
         this.pieceY = 19;
         this.pieceX = 5;
+        this.pieceCurrent = this.ntNext();
+        this.pieceRotation = 0;
+        this.pieceNext = this.ntNext();
+
         this.recommendedColors = this.levelColors(this.currentLevel);
+        this.pieceColors = [1, 2, 3, 1, 2, 3, 1];
         
         this.gameField =
         [
@@ -234,6 +245,200 @@ class NTEngine
         else return 800;
     };
 
+    getPlayField()
+    {
+        let _gameField = [];
+
+        //Make a copy of the playfield.
+        for(let i = 0; i < this.gameField.length; i++)
+        {
+            _gameField.push([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+            for(let j = 0; j < this.gameField[i].length; j++)
+            {
+                _gameField[i][j] = this.gameField[i][j];
+            }
+        }
+
+        //Get the color index for the current piece.
+        let thisColorIndex = this.pieceColors[this.pieceCurrent];
+
+        //Add in the current piece.
+        switch(this.pieceCurrent)
+        {
+            case NTEngine.PIECE_T:
+                _gameField[this.pieceY][this.pieceX] = thisColorIndex;
+                switch(this.pieceRotation)
+                {
+                    case 0:
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        break;
+
+                    case 1:
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY+1][this.pieceX  ] = thisColorIndex;
+                        break;
+
+                    case 2:
+                        _gameField[this.pieceY+1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        break;
+
+                    default:
+                        _gameField[this.pieceY+1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        break;
+                }
+                break;
+
+            case NTEngine.PIECE_BKL:
+                _gameField[this.pieceY][this.pieceX] = thisColorIndex;
+                switch(this.pieceRotation)
+                {
+                    case 0:
+                        
+                        _gameField[this.pieceY  ][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX+1] = thisColorIndex;
+                        break;
+
+                    case 1:
+                        _gameField[this.pieceY-1][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY+1][this.pieceX  ] = thisColorIndex;
+                        break;
+
+                    case 2:
+                        _gameField[this.pieceY  ][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        _gameField[this.pieceY+1][this.pieceX-1] = thisColorIndex;
+                        break;
+
+                    default:
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY+1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY+1][this.pieceX+1] = thisColorIndex;
+                        break;
+                }
+                break;
+
+            case NTEngine.PIECE_Z:
+                _gameField[this.pieceY][this.pieceX] = thisColorIndex;
+                switch(this.pieceRotation)
+                {
+                    case 0:
+                    case 2:
+                        _gameField[this.pieceY  ][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX+1] = thisColorIndex;
+                        break;
+
+                    default:
+                        _gameField[this.pieceY-1][this.pieceX]   = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        _gameField[this.pieceY+1][this.pieceX+1] = thisColorIndex;
+                        break;
+                }
+                break;
+
+            case NTEngine.PIECE_SQR:
+                _gameField[this.pieceY][this.pieceX] = thisColorIndex;
+                _gameField[this.pieceY][this.pieceX-1] = thisColorIndex;
+                _gameField[this.pieceY-1][this.pieceX-1] = thisColorIndex;
+                _gameField[this.pieceY-1][this.pieceX] = thisColorIndex;
+                break;
+
+            case NTEngine.PIECE_S:
+                _gameField[this.pieceY][this.pieceX] = thisColorIndex;
+                switch(this.pieceRotation)
+                {
+                    case 0:
+                    case 2:
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX-1] = thisColorIndex;
+                        break;
+
+                    default:
+                        _gameField[this.pieceY+1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX+1] = thisColorIndex;
+                        break;
+                }
+                break;
+
+            case NTEngine.PIECE_L:
+                _gameField[this.pieceY][this.pieceX] = thisColorIndex;
+                switch(this.pieceRotation)
+                {
+                    case 0:
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX-1] = thisColorIndex;
+                        break;
+
+                    case 1:
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY+1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY+1][this.pieceX-1] = thisColorIndex;
+                        break;
+
+                    case 2:
+                        _gameField[this.pieceY+1][this.pieceX+1] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY  ][this.pieceX+1] = thisColorIndex;
+                        break;
+
+                    default:
+                        _gameField[this.pieceY+1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX  ] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX+1] = thisColorIndex;
+                        break;
+                }
+                break;
+
+            default:
+                _gameField[this.pieceY][this.pieceX] = thisColorIndex;
+                switch(this.pieceRotation)
+                {
+                    case 0:
+                    case 2:
+                        _gameField[this.pieceY][this.pieceX+1] = thisColorIndex;
+                        _gameField[this.pieceY][this.pieceX-1] = thisColorIndex;
+                        _gameField[this.pieceY][this.pieceX-2] = thisColorIndex;
+                        break;
+
+                    default:
+                        _gameField[this.pieceY+1][this.pieceX] = thisColorIndex;
+                        _gameField[this.pieceY+2][this.pieceX] = thisColorIndex;
+                        _gameField[this.pieceY-1][this.pieceX] = thisColorIndex;
+                        break;
+                }
+                break;
+        }
+
+        return _gameField;
+    }
+
+    //Copy the active piece into the game field. This happens after the piece is set in place.
+    updatePlayField()
+    {
+        let _gameField = this.getPlayField();
+
+        //Copy _gameField into gameField.
+        for(let i = 0; i < this.gameField.length; i++)
+        {
+            for(let j = 0; j < this.gameField[i].length; j++)
+            {
+                this.gameField[i][j] = _gameField[i][j];
+            }
+        }
+    }
+
     //Seeds the random number generator.
     ntRandom(seed)
     {
@@ -246,23 +451,747 @@ class NTEngine
     {
         this._seed = this._seed * 16807 % 2147483647;
         return this._seed % 7;
-    };
+    }
 
     //Used by outside code to get the current game status.
     ntStatus()
     {
+        return {
+            gameStatus:        this.gameStatus,
+            lastRequestStatus: this.lastRequestStatus,
+            currentLevel:      this.currentLevel,
+            currentScore:      this.currentScore,
+            linesCleared:      this.linesCleared,
+            rowsToErase:       this.rowsToErase,
+            pieceY:            this.pieceY,
+            pieceX:            this.pieceX,
+            pieceCurrent:      this.pieceCurrent,
+            pieceRotation:     this.pieceRotation,
+            pieceNext:         this.pieceNext,
+            recommendedColors: this.recommendedColors,
+            gameField:         this.getPlayField()
+        }
+    }
 
+    ntReset(gameLevel)
+    {
+        this.gameStatus        = NTEngine.GS_PLAY;
+        this.lastRequestStatus = NTEngine.LRS_ACCEPT;
+        this.currentLevel      = gameLevel;
+        this.currentScore      = 0;
+        this.linesCleared      = 0;
+        this.rowsToErase       = [];
+        this.pieceY            = 19;
+        this.pieceX            = 5;
+        this.pieceCurrent      = this.ntNext();
+        this.pieceRotation     = 0;
+        this.pieceNext         = this.ntNext();
+        this.recommendedColors = this.levelColors(this.currentLevel);
+        this.gameField =
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+
+        let self = this;
+
+        //Set the piece timer based on the current level.
+        clearInterval(this.timer);
+        this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
+    }
+
+    //This function locks a piece onto the playing field.
+    gluePiece()
+    {
+        this.updatePlayField();
+        this.pieceCurrent = this.pieceNext;
+        this.lastRequestStatus = NTEngine.LRS_ACCEPT;
+        this.pieceNext = this.ntNext();
+        this.pieceY = 19;
+        this.pieceX = 5;
+    }
+
+    //Check for collisions on the X,Y pairs.
+    checkCollisions(collisionsArr)
+    {
+        let collisionFound = false;
+        for(let i = 0; i < collisionsArr.length; i++)
+        {
+            if(this.gameField[this.pieceY+collisionsArr[i].y][this.pieceX+collisionsArr[i].x] !== 0)
+            {
+                collisionFound = true;
+            } 
+        }
+        return collisionFound;
+    }
+
+    //Move a piece 1 place to the left.
+    movePieceLeft()
+    {
+        this.pieceX--;
+        this.lastRequestStatus = NTEngine.LRS_ACCEPT;
+    }
+
+    //Move a piece to the right.
+    movePieceRight()
+    {
+        this.pieceX++;
+        this.lastRequestStatus = NTEngine.LRS_ACCEPT;
+    }
+
+    //Move a piece down.
+    MovePieceDown()
+    {
+        this.pieceY--;
+        this.lastRequestStatus = NTEngine.LRS_ACCEPT;
     }
 
     //Used by outside code to make a request of the NT engine.
-    ntRequest(request, lines)
+    ntRequest(request, param)
     {
+        switch(request)
+        {
+            case NTEngine.GR_NONE:
+                //Check if the object should be returned instead of being sent by the callback.
+                if(param !== 1)
+                {
+                    return this.ntStatus();
+                }
+                break;
 
-    }
+            /********************************* Rotate Clockwise **********************************/
 
-    //Used by the NTEngine object to update its internal state.
-    ntUpdate()
-    {
+            case NTEngine.GR_ROTATE_CW:
+                switch(this.pieceCurrent)
+                {
+                    case NTEngine.PIECE_T:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
 
+                    case NTEngine.PIECE_BKL:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_Z:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_SQR:
+                        break;
+
+                    case NTEngine.PIECE_S:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_L:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    default:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                };
+                break;
+
+            /***************************** Rotate Counter Clockwise ******************************/
+            
+            case NTEngine.GR_ROTATE_CCW:
+                switch(this.pieceCurrent)
+                {
+                    case NTEngine.PIECE_T:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_BKL:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_Z:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_SQR:
+                        break;
+
+                    case NTEngine.PIECE_S:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_L:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    default:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                };
+                break;
+
+            /********************************* Move Piece Left **********************************/
+
+            case NTEngine.GR_LEFT:
+                //Make sure the game is playing.
+                if(this.gameStatus !== NTEngine.GS_PLAY)
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    break;
+                }
+                
+                switch(this.pieceCurrent)
+                {
+                    case NTEngine.PIECE_T:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision left.
+                                (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -1}, {y: 0, x: -2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
+                                break;
+
+                            case 1:
+
+                                break;
+
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_BKL:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision left.
+                                (this.pieceX === 1 || this.checkCollisions([{y: -1, x: 0}, {y: 0, x: -2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
+                                break;
+
+                            case 1:
+
+                                break;
+
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_Z:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision left.
+                                (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -1}, {y: 0, x: -2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_SQR:
+                        //Check for collision left.
+                        (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -2}, {y: 0, x: -2}])) ?
+                            this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
+                        break;
+
+                    case NTEngine.PIECE_S:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision left.
+                                (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -2}, {y: 0, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_L:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision left.
+                                (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -2}, {y: 0, x: -2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
+                                break;
+
+                            case 1:
+
+                                break;
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    default:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision left.
+                                (this.pieceX === 2 || this.checkCollisions([{y: 0, x: -3}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+                };
+                break;
+
+            /********************************* Move Piece Right **********************************/
+
+            case NTEngine.GR_RIGHT:
+                //Make sure the game is playing.
+                if(this.gameStatus !== NTEngine.GS_PLAY)
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    break;
+                }
+
+                switch(this.pieceCurrent)
+                {
+                    case NTEngine.PIECE_T:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision right.
+                                (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 1}, {y: 0, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
+                                break;
+
+                            case 1:
+
+                                break;
+
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_BKL:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision right.
+                                (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 2}, {y: 0, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
+                                break;
+
+                            case 1:
+
+                                break;
+
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_Z:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision right.
+                                (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 2}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_SQR:
+                        //Check for collision right.
+                        (this.pieceX === 9 || this.checkCollisions([{y: -1, x: 1}, {y: 0, x: 1}])) ?
+                            this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
+                        break;
+
+                    case NTEngine.PIECE_S:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision right.
+                                (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 1}, {y: 0, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_L:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision right.
+                                (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 0}, {y: 0, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
+                                break;
+
+                            case 1:
+
+                                break;
+
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    default:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision right.
+                                (this.pieceX === 8 || this.checkCollisions([{y: 0, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+                };
+                break;
+
+            /********************************** Move Piece Down **********************************/
+
+            case NTEngine.GR_DOWN:
+                //Make sure the game is playing.
+                if(this.gameStatus !== NTEngine.GS_PLAY)
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    break;
+                }
+
+                switch(this.pieceCurrent)
+                {
+                    case NTEngine.PIECE_T:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision below.
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0},
+                                    {y: -1, x: -1}, {y: -1, x: 1}])) ? this.gluePiece() : this.MovePieceDown();
+                                break;
+
+                            case 1:
+
+                                break;
+
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_BKL:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision below.
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 1},
+                                    {y: -1, x: 0}, {y: -1, x: -1}])) ? this.gluePiece() : this.MovePieceDown();
+                                break;
+
+                            case 1:
+
+                                break;
+
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_Z:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision below.
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, 
+                                    {y: -1, x: -1}, {y: -2, x: 1}])) ? this.gluePiece() : this.MovePieceDown();
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_SQR:
+                        //Check for collision below.
+                        (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0},
+                            {y: -2, x: -1}])) ? this.gluePiece() : this.pieceY--;
+                        break;
+
+                    case NTEngine.PIECE_S:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision below.
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0},
+                                    {y: -2, x: -1}, {y: -1, x: 1}])) ? this.gluePiece() : this.MovePieceDown();
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    case NTEngine.PIECE_L:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                                //Check for collision below.
+                                (this.pieceY === 1 || this.checkCollisions([{y: -1, x: 0},
+                                    {y: -1, x: 1}, {y: -2, x: -1}])) ? this.gluePiece() : this.MovePieceDown();
+                                break;
+
+                            case 1:
+
+                                break;
+
+                            case 2:
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                        break;
+
+                    default:
+                        switch(this.pieceRotation)
+                        {
+                            case 0:
+                            case 2:
+                                //Check for collision below.
+                                (this.pieceY === 0 || this.checkCollisions([{y: -1, x: 0}, {y: -1, x: 1},
+                                    {y: -1, x: -1}, {y: -1, x: -2}])) ? this.gluePiece() : this.MovePieceDown();
+                                break
+                    
+                            default:
+
+                                break;
+                        }
+                        break;
+                };
+                break;
+
+            case NTEngine.GR_PAUSE:
+
+                break;
+
+            case NTEngine.GR_RESUME:
+
+                break;
+
+            case NTEngine.GR_ADD_LINES:
+
+                break;
+
+            case NTEngine.GR_RESET:
+                //The level to start on must be set.
+                let paramInt = parseInt(param);
+
+                if(isNaN(paramInt) || param < 0 || param > 29)
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    break;
+                }
+
+                this.ntReset(param);
+                break;
+
+            case NTEngine.GR_RESEED:
+
+                break;
+
+            default:
+                break;
+        }
+
+        this.statusCallback(this.ntStatus());
     }
 }
