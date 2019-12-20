@@ -1386,8 +1386,8 @@ class NTEngine
                     //Check if lines need to be added.
                     if(this.rowsToAddTotal > 0)
                     {
-                        this.rowsToAddNow = this.rowsToAddTotal;
-                        this.rowsToAddTotal = 0;
+                        this.rowsToAddNow = parseInt(this.rowsToAddTotal);
+                        this.rowsToAddTotal -= this.rowsToAddNow;
                         this.gameStatus = NTEngine.GS_WAIT_BLK;
 
                         //Get the random blank spots so the renderer can show them.
@@ -1442,9 +1442,9 @@ class NTEngine
 
             case NTEngine.GR_ADD_LINES:
                 //The number of lines must be set.
-                let addParamInt = parseInt(param);
+                let addParamInt = param;
 
-                if(isNaN(addParamInt) || addParamInt < 1 || addParamInt > 18)
+                if(isNaN(addParamInt) || addParamInt <=0 || addParamInt > 18)
                 {
                     this.lastRequestStatus = NTEngine.LRS_REJECT;
                     break;

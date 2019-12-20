@@ -136,7 +136,7 @@ $( document ).ready(function()
     $("#line-1").on("click", function()
     {
         console.log("Add 1 line");
-        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 1);
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, .23);
     });
 
     $("#line-2").on("click", function()
