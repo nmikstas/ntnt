@@ -161,9 +161,11 @@ class NTEngine
         this.currentLevel   = 0;
         this.currentScore   = 0;
         this.linesCleared   = 0;
+
         this.rowsToErase    = [];
         this.rowsToAddNow   = 0;
         this.rowsToAddTotal = 0;
+        this.blanks         = [];
 
         this.pieceY = 19;
         this.pieceX = 5;
@@ -428,6 +430,12 @@ class NTEngine
         return _gameField;
     }
 
+    //Returns the game field to render without the current piece shown.
+    ntGetGameField()
+    {
+        return this.gameField;
+    }
+
     //Copy the active piece into the game field. This happens after the piece is set in place.
     updatePlayField()
     {
@@ -469,6 +477,7 @@ class NTEngine
             rowsToErase:       this.rowsToErase,
             rowsToAddNow:      this.rowsToAddNow,
             rowsToAddTotal:    this.rowsToAddTotal,
+            blanks:            this.blanks,
             pieceY:            this.pieceY,
             pieceX:            this.pieceX,
             pieceCurrent:      this.pieceCurrent,
@@ -489,6 +498,7 @@ class NTEngine
         this.rowsToErase       = [];
         this.rowsToAddNow      = 0;
         this.rowsToAddTotal    = 0;
+        this.blanks            = [];
         this.pieceY            = 19;
         this.pieceX            = 5;
         this.pieceCurrent      = this.ntNext();
@@ -740,7 +750,31 @@ class NTEngine
     //Add lines to the play field.
     addLines()
     {
+        //Move all the rows up by and add blocks below.
+        for(let i = 0; i < this.rowsToAddNow; i++)
+        {
+            for(let j = this.gameField.length-2; j > 0; j--)
+            {
+                this.gameField[j] = this.gameField[j-1];
+            }
 
+            //Clear out the top rows and the bottom row.
+            this.gameField[21] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            this.gameField[20] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            this.gameField[0]  = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+            for(let j = 0; j < this.gameField[0].length; j++)
+            {
+                if(j === this.blanks[i])
+                {
+                    this.gameField[0][j] = 0;
+                }
+                else
+                {
+                    this.gameField[0][j] = 4;
+                }
+            }
+        }
     }
 
     //Used by outside code to make a request of the NT engine.
@@ -1349,12 +1383,32 @@ class NTEngine
                     //Remove any lines that need to be cleared.
                     this.removeLines();
 
-                    if(this.gameStatus !== NTEngine.GS_OVER)
+                    //Check if lines need to be added.
+                    if(this.rowsToAddTotal > 0)
+                    {
+                        this.rowsToAddNow = this.rowsToAddTotal;
+                        this.rowsToAddTotal = 0;
+                        this.gameStatus = NTEngine.GS_WAIT_BLK;
+
+                        //Get the random blank spots so the renderer can show them.
+                        for(let i = 0; i < this.rowsToAddNow; i++)
+                        {
+                            this.blanks.push(Math.floor(Math.random() * 10));
+                        }
+                    }
+                    //Only resume play if the game is not over.
+                    else if(this.gameStatus !== NTEngine.GS_OVER)
                     {
                         let self = this;
+                        clearInterval(this.timer);
                         this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
                         this.gameStatus = NTEngine.GS_PLAY;
-                    }   
+                    }
+                    //Otherwise reject the request.
+                    else
+                    {
+                        this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    }  
                 }
                 else
                 {
@@ -1371,7 +1425,10 @@ class NTEngine
 
                     if(this.gameStatus !== NTEngine.GS_OVER)
                     {
+                        this.rowsToAddNow = 0;
+                        this.blanks = [];
                         let self = this;
+                        clearInterval(this.timer);
                         this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
                         this.gameStatus = NTEngine.GS_PLAY;
                     }   
@@ -1394,6 +1451,13 @@ class NTEngine
                 }
 
                 this.rowsToAddTotal += param;
+
+                //Only allow 18 lines max.
+                if(this.rowsToAddTotal > 18)
+                {
+                    this.rowsToAddTotal = 18;
+                }
+                
                 this.lastRequestStatus = NTEngine.LRS_ACCEPT;
                 break;
 

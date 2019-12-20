@@ -1,3 +1,4 @@
+let ntEngine;
 let playField   = [];
 let nextPiece   = [];
 let rowsToErase = [];
@@ -5,6 +6,9 @@ let isStarted   = false;
 let animTimer;
 let animCounter = 0;
 let glueTimer;
+let blocksTimer;
+let blocksCounter = 0;
+let blankBlocks = [];
 
 /****************************************** Play Field *******************************************/
 
@@ -132,31 +136,37 @@ $( document ).ready(function()
     $("#line-1").on("click", function()
     {
         console.log("Add 1 line");
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 1);
     });
 
     $("#line-2").on("click", function()
     {
         console.log("Add 2 lines");
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 2);
     });
 
     $("#line-5").on("click", function()
     {
         console.log("Add 5 lines");
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 5);
     });
 
     $("#line-10").on("click", function()
     {
         console.log("Add 10 lines");
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 10);
     });
 
     $("#line-18").on("click", function()
     {
         console.log("Add 18 lines");
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 18);
     });
 
     $("#line-25").on("click", function()
     {
         console.log("Add 25 lines");
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 25);
     });
 
     $("#seed-btn").on("click", function(event)
@@ -164,8 +174,6 @@ $( document ).ready(function()
         event.preventDefault();
         console.log("Reseed RNG");
     });
-
-
 });
 
 /********************************************* Stats *********************************************/
@@ -196,6 +204,51 @@ for(let i = nextPiece.length - 1; i >= 0; i--)
 
 /****************************************** Animations *******************************************/
 
+let addBlocksAnim = function()
+{
+    //Reset after add rows animation is complete.
+    if(blocksCounter >= blankBlocks.length)
+    {
+        ntEngine.ntRequest(NTEngine.GR_RESUME_BLK);
+        clearInterval(blocksTimer);
+        document.addEventListener('keydown', logKey);
+        document.addEventListener('keyup', doKeyUp);
+        document.addEventListener('keydown', doKeyDown);
+        blocksCounter = 0;
+        blankBlocks = [];
+        return;
+    }
+
+    for(let i = playField.length-1; i > 0; i--)
+    {
+        for(let j = 0; j < 10; j++)
+        {
+            let borderColor = playField[i-1][j].css("border-left-color");
+            playField[i][j].css("background-color", playField[i-1][j].css("background-color"));
+            playField[i][j].css("border-left-color", borderColor);
+            playField[i][j].css("border-right-color", borderColor);
+            playField[i][j].css("border-top-color", borderColor);
+            playField[i][j].css("border-bottom-color", borderColor);
+        }
+    }
+
+    for(let j = 0; j < 10; j++)
+    {
+        if(j === blankBlocks[blocksCounter])
+        {
+            playField[0][j].css("background-color", "rgb(0,0,0)");
+            playField[0][j].css("border", "1px solid #000000");
+        }
+        else
+        {
+            playField[0][j].css("background-color", "rgb(116,116,116)");
+            playField[0][j].css("border", "1px solid #666666");
+        }        
+    }
+
+    blocksCounter++;
+}
+
 let eraseAnim = function()
 {
     //Finish up the animation.
@@ -206,6 +259,8 @@ let eraseAnim = function()
         document.addEventListener('keydown', logKey);
         document.addEventListener('keyup', doKeyUp);
         document.addEventListener('keydown', doKeyDown);
+        animCounter = 0;
+        return;
     }
 
     for(let i = 0; i < rowsToErase.length; i++)
@@ -283,7 +338,7 @@ let render = function(status)
     }
 
     //Check if animation wait state.
-    if(gameStatus == NTEngine.GS_WAIT)
+    if(gameStatus === NTEngine.GS_WAIT)
     {
         document.removeEventListener('keydown', logKey);
         document.removeEventListener('keyup', doKeyUp);
@@ -391,7 +446,16 @@ let render = function(status)
     }
 
     //Render the game field.
-    let field = status.gameField;
+    let field;
+    if(gameStatus !== NTEngine.GS_WAIT_BLK)
+    {
+        field = status.gameField;
+    }
+    else
+    {
+        field = ntEngine.ntGetGameField();
+    }
+    
     for(let i = 0; i < 20; i++)
     {
         for(let j = 0; j < 10; j++)
@@ -422,12 +486,26 @@ let render = function(status)
         }
     }
 
+    //Check if block add wait state,
+    if(gameStatus === NTEngine.GS_WAIT_BLK)
+    {
+        document.removeEventListener('keydown', logKey);
+        document.removeEventListener('keyup', doKeyUp);
+        document.removeEventListener('keydown', doKeyDown);
+        Key._pressed = [];
+
+        blankBlocks = status.blanks;
+        clearInterval(blocksTimer);
+        blocksTimer = setInterval(function(){addBlocksAnim()}, 50);
+        return;
+    }
+
 }
 
 /****************************************** Game Engine ******************************************/
 
 //Instantiate the game engine.
-let ntEngine = new NTEngine(255, render);
+ntEngine = new NTEngine(255, render);
 
 
 
