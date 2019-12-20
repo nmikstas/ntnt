@@ -1,5 +1,10 @@
-let playField = [];
-let nextPiece = [];
+let playField   = [];
+let nextPiece   = [];
+let rowsToErase = [];
+let isStarted   = false;
+let animTimer;
+let animCounter = 0;
+let glueTimer;
 
 /****************************************** Play Field *******************************************/
 
@@ -12,7 +17,7 @@ for(let i = 0; i < 20; i++)
     {
         let thisSpan = $("<span>");
         thisSpan.addClass("this-span");
-        thisSpan.text(j);
+        //thisSpan.text(j);
         thisRow.push(thisSpan);
     }
 
@@ -29,9 +34,139 @@ for(let i = playField.length - 1; i >= 0; i--)
     let rowDiv = $("<div>");
     rowDiv.addClass("this-div");
     rowDiv.append(playField[i]);
-    rowDiv.append(rowP);
+    //rowDiv.append(rowP);
     $(".play-div").append(rowDiv);
 }
+
+/**************************************** Keyboard Input *****************************************/
+
+let logKey = function(e)
+{
+    if(e.key.toLowerCase() === "k" && !e.repeat)
+    {
+        console.log("Rotate CCW");
+    }
+
+    if(e.key.toLowerCase() === "l" && !e.repeat)
+    {
+        console.log("Rotate CW");
+    }
+
+    if(e.key.toLowerCase() === "p" && !e.repeat)
+    {
+        console.log("Toggle Pause");
+    }
+
+    if(e.key.toLowerCase() === "r" && !e.repeat)
+    {
+        console.log("Reset Game");
+        ntEngine.ntRequest(NTEngine.GR_RESET, 2);
+        isStarted = true;
+    }
+
+    if(e.key === "ArrowLeft")
+    {
+        console.log("Move Left");
+        ntEngine.ntRequest(NTEngine.GR_LEFT);
+    }
+
+    if(e.key === "ArrowRight")
+    {
+        console.log("Move Right");
+        ntEngine.ntRequest(NTEngine.GR_RIGHT);
+    }
+}
+
+let Key =
+{
+    _pressed: {},
+  
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    DOWN: 40,
+    
+    isDown: function(keyCode)
+    {
+        return this._pressed[keyCode];
+    },
+    
+    onKeydown: function(event)
+    {
+        this._pressed[event.keyCode] = true;
+    },
+    
+    onKeyup: function(event)
+    {
+        delete this._pressed[event.keyCode];
+    }
+};
+
+let doKeyUp = function()
+{
+    Key.onKeyup(event);
+}
+
+let doKeyDown = function()
+{
+    Key.onKeydown(event);
+}
+
+document.addEventListener('keydown', logKey);
+document.addEventListener('keyup', doKeyUp);
+document.addEventListener('keydown', doKeyDown);
+
+//Special listener for key down.
+setInterval(function()
+{
+    if (Key.isDown(Key.DOWN))
+    {
+        ntEngine.ntRequest(NTEngine.GR_DOWN);
+    }
+}, 17);
+
+/*************************************** Button Listeners ****************************************/
+
+$( document ).ready(function()
+{
+    $("#line-1").on("click", function()
+    {
+        console.log("Add 1 line");
+    });
+
+    $("#line-2").on("click", function()
+    {
+        console.log("Add 2 lines");
+    });
+
+    $("#line-5").on("click", function()
+    {
+        console.log("Add 5 lines");
+    });
+
+    $("#line-10").on("click", function()
+    {
+        console.log("Add 10 lines");
+    });
+
+    $("#line-18").on("click", function()
+    {
+        console.log("Add 18 lines");
+    });
+
+    $("#line-25").on("click", function()
+    {
+        console.log("Add 25 lines");
+    });
+
+    $("#seed-btn").on("click", function(event)
+    {
+        event.preventDefault();
+        console.log("Reseed RNG");
+    });
+
+
+});
 
 /********************************************* Stats *********************************************/
 
@@ -59,19 +194,52 @@ for(let i = nextPiece.length - 1; i >= 0; i--)
     $(".next-div").append(rowDiv);
 }
 
+/****************************************** Animations *******************************************/
+
+let eraseAnim = function()
+{
+    //Finish up the animation.
+    if(animCounter >= 10)
+    {
+        ntEngine.ntRequest(NTEngine.GR_RESUME);
+        clearInterval(animTimer);
+        document.addEventListener('keydown', logKey);
+        document.addEventListener('keyup', doKeyUp);
+        document.addEventListener('keydown', doKeyDown);
+    }
+
+    for(let i = 0; i < rowsToErase.length; i++)
+    {
+        playField[rowsToErase[i]][animCounter].css("background-color", "rgb(0,0,0)");
+        playField[rowsToErase[i]][animCounter].css("border", "1px solid #000000");
+    }
+
+    animCounter++;
+}
+
+let glueDelay = function()
+{
+    ntEngine.ntRequest(NTEngine.GR_RESUME);
+    clearInterval(glueTimer);
+    document.addEventListener('keydown', logKey);
+    document.addEventListener('keyup', doKeyUp);
+    document.addEventListener('keydown', doKeyDown);
+}
+
 /************************************** Rendering Function ***************************************/
 
 //Render the play field.
 let render = function(status)
 {
     //console.log(status);
-    let pieceNext = status.pieceNext;
-    let colors = status.recommendedColors;
-    let level = status.currentLevel;
-    let score = status.currentScore;
-    let request = status.lastRequestStatus;
-    let lines = status.linesCleared;
+    let pieceNext  = status.pieceNext;
+    let colors     = status.recommendedColors;
+    let level      = status.currentLevel;
+    let score      = status.currentScore;
+    let request    = status.lastRequestStatus;
+    let lines      = status.linesCleared;
     let gameStatus = status.gameStatus;
+    rowsToErase    = status.rowsToErase;
 
     //Append all the stats.
     $("#h-score").text("Score: " + score);
@@ -113,12 +281,35 @@ let render = function(status)
             $("#h-status").text("Game Status: Animation Wait");
             break;
     }
-    
+
+    //Check if animation wait state.
+    if(gameStatus == NTEngine.GS_WAIT)
+    {
+        document.removeEventListener('keydown', logKey);
+        document.removeEventListener('keyup', doKeyUp);
+        document.removeEventListener('keydown', doKeyDown);
+        Key._pressed = [];
+
+        if(status.rowsToErase.length > 0)
+        {
+            console.log("Erase " + status.rowsToErase.length + " rows");
+            animCounter = 0;
+            clearInterval(animTimer);
+            animTimer = setInterval(function(){eraseAnim()}, 50);
+        }
+        else
+        {
+            clearInterval(glueTimer);
+            glueTimer = setInterval(function(){glueDelay()}, 100);
+        }
+        return;
+    }
+
     //Clear the old colors.
     $(".next-span").css("background-color", colors[0]);
 
     //Exit if the game is over.
-    if(gameStatus === NTEngine.GS_OVER) return;
+    if(gameStatus === NTEngine.GS_OVER && !isStarted) return;
 
     //Render the next piece.
     switch(pieceNext)
@@ -173,102 +364,65 @@ let render = function(status)
             break;
     }
 
+    //Remove any borders on next piece blocks.
+    for(let i = 0; i < nextPiece.length; i++)
+    {
+        for(let j = 0; j < nextPiece[i].length; j++)
+        {
+                nextPiece[i][j].css("border", "0");   
+        }
+    }
+
+    //Add borders on next piece colored blocks.
+    for(let i = 0; i < nextPiece.length; i++)
+    {
+        for(let j = 0; j < nextPiece[i].length; j++)
+        {
+            let color = nextPiece[i][j].css( "background-color" );
+            if(color !== "rgb(0, 0, 0)")
+            {
+                nextPiece[i][j].css("border", "1px solid #666666");
+            }
+            else
+            {
+                nextPiece[i][j].css("border", "1px solid #000000");
+            }
+        }
+    }
+
     //Render the game field.
     let field = status.gameField;
     for(let i = 0; i < 20; i++)
     {
         for(let j = 0; j < 10; j++)
         {
-            let colorPalette = ntEngine.levelColors(0);
-            playField[i][j].css("background-color", colorPalette[field[i][j]]);
+            playField[i][j].css("background-color", colors[field[i][j]]);
+        }
+    }
+
+    //Remove any borders on game field blocks.
+    for(let i = 0; i < playField.length; i++)
+    {
+        for(let j = 0; j < playField[i].length; j++)
+        {
+                playField[i][j].css("border", "1px solid #000000");   
+        }
+    }
+
+    //Add borders on game field colored blocks.
+    for(let i = 0; i < playField.length; i++)
+    {
+        for(let j = 0; j < playField[i].length; j++)
+        {
+            let color = playField[i][j].css( "background-color" );
+            if(color !== "rgb(0, 0, 0)")
+            {
+                playField[i][j].css("border", "1px solid #666666");
+            }
         }
     }
 
 }
-
-/**************************************** Keyboard Input *****************************************/
-
-let logKey = function(e)
-{
-    if(e.key.toLowerCase() === "k" && !e.repeat)
-    {
-        console.log("Rotate CCW");
-    }
-
-    if(e.key.toLowerCase() === "l" && !e.repeat)
-    {
-        console.log("Rotate CW");
-    }
-
-    if(e.key.toLowerCase() === "p" && !e.repeat)
-    {
-        console.log("Toggle Pause");
-    }
-
-    if(e.key.toLowerCase() === "r" && !e.repeat)
-    {
-        console.log("Reset Game");
-        ntEngine.ntRequest(NTEngine.GR_RESET, 0);
-    }
-
-    if(e.key === "ArrowLeft")
-    {
-        console.log("Move Left");
-        ntEngine.ntRequest(NTEngine.GR_LEFT);
-    }
-
-    if(e.key === "ArrowRight")
-    {
-        console.log("Move Right");
-        ntEngine.ntRequest(NTEngine.GR_RIGHT);
-    }
-}
-
-document.addEventListener('keydown', logKey);
-
-var Key =
-{
-    _pressed: {},
-  
-    LEFT: 37,
-    UP: 38,
-    RIGHT: 39,
-    DOWN: 40,
-    
-    isDown: function(keyCode)
-    {
-        return this._pressed[keyCode];
-    },
-    
-    onKeydown: function(event)
-    {
-        this._pressed[event.keyCode] = true;
-    },
-    
-    onKeyup: function(event)
-    {
-        delete this._pressed[event.keyCode];
-    }
-};
-  
-window.addEventListener('keyup', function(event)
-{
-    Key.onKeyup(event);
-});
-
-window.addEventListener('keydown', function(event)
-{
-    Key.onKeydown(event);
-});
-
-//Special listener for key down.
-setInterval(function()
-{
-    if (Key.isDown(Key.DOWN))
-    {
-        ntEngine.ntRequest(NTEngine.GR_DOWN);
-    }
-}, 17);
 
 /****************************************** Game Engine ******************************************/
 

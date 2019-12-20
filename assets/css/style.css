@@ -100,16 +100,18 @@ footer
 
 .this-div
 {
+    box-sizing: border-box;
     margin: 0;
     line-height: 0;
 }
 
 .this-span
 {
+    box-sizing: border-box;
     height: 30px;
     width: 30px;
     background-color: black;
-    border: 1px solid #666666;
+    border: 1px solid #000000;
     display: inline-block;
     text-align: center;
     padding-top: 12px;
@@ -117,10 +119,11 @@ footer
 
 .next-span
 {
+    box-sizing: border-box;
     height: 30px;
     width: 30px;
     background-color: black;
-    border: 1px solid #666666;
+    border: 1px solid #000000;
     display: inline-block;
     text-align: center;
     padding-top: 12px;

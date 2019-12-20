@@ -108,10 +108,11 @@
 class NTEngine
 {
     //Game status.
-    static get GS_OVER()  { return 0 };
-    static get GS_PLAY()  { return 1 };
-    static get GS_PAUSE() { return 2 };
-    static get GS_WAIT()  { return 3 };
+    static get GS_OVER()     { return 0 };
+    static get GS_PLAY()     { return 1 };
+    static get GS_PAUSE()    { return 2 };
+    static get GS_WAIT()     { return 3 };
+    static get GS_WAIT_BLK() { return 4 };
 
     //Game requests.
     static get GR_NONE()       { return 0 };
@@ -125,6 +126,7 @@ class NTEngine
     static get GR_ADD_LINES()  { return 8 };
     static get GR_RESET()      { return 9 };
     static get GR_RESEED()     { return 10 };
+    static get GR_RESUME_BLK() { return 11 };
 
     //Last request status
     static get LRS_NONE()   { return 0 };
@@ -156,10 +158,12 @@ class NTEngine
         //Game engine variables.
         this.gameStatus = NTEngine.GS_OVER;
         this.lastRequestStatus = NTEngine.LRS_NONE;
-        this.currentLevel = 0;
-        this.currentScore = 0;
-        this.linesCleared = 0;
-        this.rowsToErase = [];
+        this.currentLevel   = 0;
+        this.currentScore   = 0;
+        this.linesCleared   = 0;
+        this.rowsToErase    = [];
+        this.rowsToAddNow   = 0;
+        this.rowsToAddTotal = 0;
 
         this.pieceY = 19;
         this.pieceX = 5;
@@ -463,6 +467,8 @@ class NTEngine
             currentScore:      this.currentScore,
             linesCleared:      this.linesCleared,
             rowsToErase:       this.rowsToErase,
+            rowsToAddNow:      this.rowsToAddNow,
+            rowsToAddTotal:    this.rowsToAddTotal,
             pieceY:            this.pieceY,
             pieceX:            this.pieceX,
             pieceCurrent:      this.pieceCurrent,
@@ -481,6 +487,8 @@ class NTEngine
         this.currentScore      = 0;
         this.linesCleared      = 0;
         this.rowsToErase       = [];
+        this.rowsToAddNow      = 0;
+        this.rowsToAddTotal    = 0;
         this.pieceY            = 19;
         this.pieceX            = 5;
         this.pieceCurrent      = this.ntNext();
@@ -520,15 +528,178 @@ class NTEngine
         this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
     }
 
+    checkGameOver()
+    {
+        let gameOver = false;
+
+        if(this.gameField[19][5] !== 0)
+        {
+            gameOver = true;
+        }
+
+        switch(this.pieceCurrent)
+        {
+            case NTEngine.PIECE_T:
+                if(this.gameField[19][4] || this.gameField[19][6] || this.gameField[18][5])
+                {
+                    gameOver = true;
+                }
+                break;
+
+            case NTEngine.PIECE_BKL:
+                if(this.gameField[19][4] || this.gameField[19][6] || this.gameField[18][6])
+                {
+                    gameOver = true;
+                }
+                break;
+
+            case NTEngine.PIECE_Z:
+                if(this.gameField[19][4] || this.gameField[18][6] || this.gameField[18][5])
+                {
+                    gameOver = true;
+                }
+                break;
+
+            case NTEngine.PIECE_SQR:
+                if(this.gameField[19][4] || this.gameField[18][4] || this.gameField[18][5])
+                {
+                    gameOver = true;
+                }
+                break;
+
+            case NTEngine.PIECE_S:
+                if(this.gameField[19][5] || this.gameField[18][4] || this.gameField[18][5])
+                {
+                    gameOver = true;
+                }
+                break;
+
+            case NTEngine.PIECE_L:
+                if(this.gameField[19][4] || this.gameField[19][6] || this.gameField[18][4])
+                {
+                    gameOver = true;
+                }
+                break;
+
+            default:
+                if(this.gameField[19][4] || this.gameField[19][6] || this.gameField[18][3])
+                {
+                    gameOver = true;
+                }
+                break;
+        }
+
+        if(gameOver)
+        {
+            console.log("here");
+            clearInterval(this.timer);
+            this.gameStatus = NTEngine.GS_OVER;
+        }
+    }
+
+    updateStats()
+    {
+        //Update score.
+        if(this.rowsToErase.length === 1)
+        {
+            this.currentScore += 40 * (this.currentLevel + 1);
+        }
+        else if(this.rowsToErase.length === 2)
+        {
+            this.currentScore += 100 * (this.currentLevel + 1);
+        }
+        else if(this.rowsToErase.length === 3)
+        {
+            this.currentScore += 300 * (this.currentLevel + 1);
+        }
+        else if(this.rowsToErase.length === 4)
+        {
+            this.currentScore += 1200 * (this.currentLevel + 1);
+        }
+
+        this.linesCleared += this.rowsToErase.length;
+        let newLevel = parseInt(this.linesCleared / 10);
+
+        //Increase the level, if necessary.
+        if(newLevel > this.currentLevel)
+        {
+            this.currentLevel = newLevel;
+            this.recommendedColors = this.levelColors(this.currentLevel);
+        }
+
+        //See if the player lost.
+        this.checkGameOver();
+    }
+
+    removeLines()
+    {
+        //Always remove the 2 non-rendered lines.
+        this.gameField[20] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        this.gameField[21] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        //If more than one line is to be erased, the row numbers need to be adjusted.
+        for(let i = 0; i < this.rowsToErase.length; i++)
+        {
+            this.rowsToErase[i] -= i;
+        }
+
+        //Remove any completed lines.
+        for(let i = 0; i < this.rowsToErase.length; i++)
+        {
+            for(let j = this.rowsToErase[i]; j < this.gameField.length - 1; j++)
+            {
+                this.gameField[j] = this.gameField[j+1];
+            }
+        }
+
+        //Update all the player's stats.
+        this.updateStats();
+
+        //The work is done. Reset the line to erase.
+        this.rowsToErase = [];
+    }
+
+    //Push line numbers for lines that need to be removed.
+    checkRemoveLines()
+    {
+        for(let i = 0; i < this.gameField.length; i++)
+        {
+            //loop through every line to see if it is full.
+            let lineFull = true;
+            for(let j = 0; j < this.gameField[i].length; j++)
+            {
+                if(this.gameField[i][j] === 0)
+                {
+                    lineFull = false;
+                }
+            }
+
+            //Full line found.
+            if(lineFull)
+            {
+                this.rowsToErase.push(i);
+            }
+        }
+
+        //Shut off the timer and wait for the application to start the engine again.
+        clearInterval(this.timer);
+        this.gameStatus = NTEngine.GS_WAIT;
+    }
+
     //This function locks a piece onto the playing field.
     gluePiece()
     {
+        //Add piece as permanent part of play field.
         this.updatePlayField();
+
         this.pieceCurrent = this.pieceNext;
         this.lastRequestStatus = NTEngine.LRS_ACCEPT;
         this.pieceNext = this.ntNext();
         this.pieceY = 19;
         this.pieceX = 5;
+
+        //Check for lines to remove.
+        this.checkRemoveLines();
     }
 
     //Check for collisions on the X,Y pairs.
@@ -564,6 +735,12 @@ class NTEngine
     {
         this.pieceY--;
         this.lastRequestStatus = NTEngine.LRS_ACCEPT;
+    }
+
+    //Add lines to the play field.
+    addLines()
+    {
+
     }
 
     //Used by outside code to make a request of the NT engine.
@@ -758,7 +935,7 @@ class NTEngine
                     this.lastRequestStatus = NTEngine.LRS_REJECT;
                     break;
                 }
-                
+
                 switch(this.pieceCurrent)
                 {
                     case NTEngine.PIECE_T:
@@ -1163,19 +1340,68 @@ class NTEngine
 
                 break;
 
+            //This resumes gameplay after a piece has been glued to the play field.
             case NTEngine.GR_RESUME:
+
+                //Resume the game after an animation wait.
+                if(this.gameStatus === NTEngine.GS_WAIT)
+                {
+                    //Remove any lines that need to be cleared.
+                    this.removeLines();
+
+                    if(this.gameStatus !== NTEngine.GS_OVER)
+                    {
+                        let self = this;
+                        this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
+                        this.gameStatus = NTEngine.GS_PLAY;
+                    }   
+                }
+                else
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                }
+                break;
+
+            case NTEngine.GR_RESUME_BLK:
+                //Resume the game after a block animation wait.
+                if(this.gameStatus === NTEngine.GS_WAIT_BLK)
+                {
+                    //Add the lines to the play field.
+                    this.addLines();
+
+                    if(this.gameStatus !== NTEngine.GS_OVER)
+                    {
+                        let self = this;
+                        this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
+                        this.gameStatus = NTEngine.GS_PLAY;
+                    }   
+                }
+                else
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                }
 
                 break;
 
             case NTEngine.GR_ADD_LINES:
+                //The number of lines must be set.
+                let addParamInt = parseInt(param);
 
+                if(isNaN(addParamInt) || addParamInt < 1 || addParamInt > 18)
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    break;
+                }
+
+                this.rowsToAddTotal += param;
+                this.lastRequestStatus = NTEngine.LRS_ACCEPT;
                 break;
 
             case NTEngine.GR_RESET:
                 //The level to start on must be set.
                 let paramInt = parseInt(param);
 
-                if(isNaN(paramInt) || param < 0 || param > 29)
+                if(isNaN(paramInt) || paramInt < 0 || paramInt > 29)
                 {
                     this.lastRequestStatus = NTEngine.LRS_REJECT;
                     break;
