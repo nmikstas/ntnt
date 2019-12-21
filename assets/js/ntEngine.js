@@ -169,9 +169,13 @@ class NTEngine
 
         this.pieceY = 19;
         this.pieceX = 5;
-        this.pieceCurrent = this.ntNext();
         this.pieceRotation = 0;
-        this.pieceNext = this.ntNext();
+
+        //Fill the random number pipeline.
+        this.pieceCurrent;
+        this.pieceNext;
+        this.pieceThird;
+        this.ntRandPrime();
 
         this.recommendedColors = this.levelColors(this.currentLevel);
         this.pieceColors = [1, 2, 3, 1, 2, 3, 1];
@@ -436,6 +440,7 @@ class NTEngine
         return this.gameField;
     }
 
+    /********************************** Random Number Functions **********************************/
     //Seeds the random number generator.
     ntRandom(seed)
     {
@@ -448,6 +453,37 @@ class NTEngine
     {
         this._seed = this._seed * 16807 % 2147483647;
         return this._seed % 7;
+    }
+
+    //Prime the random number sequence with unique numbers.
+    ntRandPrime()
+    {
+        this.pieceCurrent = this.ntNext();
+
+        do
+        {
+            this.pieceNext = this.ntNext();
+        } 
+        while(this.pieceNext === this.pieceCurrent);
+
+        do
+        {
+            this.pieceThird = this.ntNext();
+        } 
+        while(this.pieceThird === this.pieceCurrent || this.pieceThird === this.pieceNext);
+    }
+
+    //Get next unique random number.
+    ntNextRand()
+    {
+        this.pieceCurrent = this.pieceNext;
+        this.pieceNext = this.pieceThird;
+
+        do
+        {
+            this.pieceThird = this.ntNext();
+        } 
+        while(this.pieceThird === this.pieceCurrent || this.pieceThird === this.pieceNext);
     }
 
     //Used by outside code to get the current game status.
@@ -465,9 +501,10 @@ class NTEngine
             blanks:            this.blanks,
             pieceY:            this.pieceY,
             pieceX:            this.pieceX,
-            pieceCurrent:      this.pieceCurrent,
             pieceRotation:     this.pieceRotation,
+            pieceCurrent:      this.pieceCurrent,
             pieceNext:         this.pieceNext,
+            pieceThird:        this.pieceThird,
             recommendedColors: this.recommendedColors,
             gameField:         this.getPlayField()
         }
@@ -486,9 +523,8 @@ class NTEngine
         this.blanks            = [];
         this.pieceY            = 19;
         this.pieceX            = 5;
-        this.pieceCurrent      = this.ntNext();
         this.pieceRotation     = 0;
-        this.pieceNext         = this.ntNext();
+        this.ntRandPrime();
         this.recommendedColors = this.levelColors(this.currentLevel);
         this.gameField =
         [
@@ -682,9 +718,8 @@ class NTEngine
         //Add piece as permanent part of play field.
         this.gameField = this.getPlayField();
 
-        this.pieceCurrent = this.pieceNext;
+        this.ntNextRand();
         this.lastRequestStatus = NTEngine.LRS_ACCEPT;
-        this.pieceNext = this.ntNext();
         this.pieceY = 19;
         this.pieceX = 5;
         this.pieceRotation = 0;

@@ -513,7 +513,7 @@ let render = function(status)
 /****************************************** Game Engine ******************************************/
 
 //Instantiate the game engine.
-ntEngine = new NTEngine(255, render);
+ntEngine = new NTEngine(255000255, render);
 
 
 
