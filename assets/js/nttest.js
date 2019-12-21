@@ -48,13 +48,13 @@ let logKey = function(e)
 {
     if(e.key.toLowerCase() === "k" && !e.repeat)
     {
-        console.log("Rotate CCW");
+        //console.log("Rotate CCW");
         ntEngine.ntRequest(NTEngine.GR_ROTATE_CCW);
     }
 
     if(e.key.toLowerCase() === "l" && !e.repeat)
     {
-        console.log("Rotate CW");
+        //console.log("Rotate CW");
         ntEngine.ntRequest(NTEngine.GR_ROTATE_CW);
     }
 
@@ -65,20 +65,20 @@ let logKey = function(e)
 
     if(e.key.toLowerCase() === "r" && !e.repeat)
     {
-        console.log("Reset Game");
+        //console.log("Reset Game");
         ntEngine.ntRequest(NTEngine.GR_RESET, 2);
         isStarted = true;
     }
 
     if(e.key === "ArrowLeft")
     {
-        console.log("Move Left");
+        //console.log("Move Left");
         ntEngine.ntRequest(NTEngine.GR_LEFT);
     }
 
     if(e.key === "ArrowRight")
     {
-        console.log("Move Right");
+        //console.log("Move Right");
         ntEngine.ntRequest(NTEngine.GR_RIGHT);
     }
 }

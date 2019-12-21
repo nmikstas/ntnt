@@ -258,10 +258,10 @@ class NTEngine
         //Make a copy of the playfield.
         for(let i = 0; i < this.gameField.length; i++)
         {
-            _gameField.push([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+            _gameField.push([]);
             for(let j = 0; j < this.gameField[i].length; j++)
             {
-                _gameField[i][j] = this.gameField[i][j];
+                _gameField[i].push(this.gameField[i][j]);
             }
         }
 
@@ -436,21 +436,6 @@ class NTEngine
         return this.gameField;
     }
 
-    //Copy the active piece into the game field. This happens after the piece is set in place.
-    updatePlayField()
-    {
-        let _gameField = this.getPlayField();
-
-        //Copy _gameField into gameField.
-        for(let i = 0; i < this.gameField.length; i++)
-        {
-            for(let j = 0; j < this.gameField[i].length; j++)
-            {
-                this.gameField[i][j] = _gameField[i][j];
-            }
-        }
-    }
-
     //Seeds the random number generator.
     ntRandom(seed)
     {
@@ -601,7 +586,6 @@ class NTEngine
 
         if(gameOver)
         {
-            console.log("here");
             clearInterval(this.timer);
             this.gameStatus = NTEngine.GS_OVER;
         }
@@ -690,17 +674,13 @@ class NTEngine
                 this.rowsToErase.push(i);
             }
         }
-
-        //Shut off the timer and wait for the application to start the engine again.
-        clearInterval(this.timer);
-        this.gameStatus = NTEngine.GS_WAIT;
     }
 
     //This function locks a piece onto the playing field.
     gluePiece()
     {
         //Add piece as permanent part of play field.
-        this.updatePlayField();
+        this.gameField = this.getPlayField();
 
         this.pieceCurrent = this.pieceNext;
         this.lastRequestStatus = NTEngine.LRS_ACCEPT;
@@ -711,6 +691,10 @@ class NTEngine
 
         //Check for lines to remove.
         this.checkRemoveLines();
+
+        //Shut off the timer and wait for the application to start the engine again.
+        clearInterval(this.timer);
+        this.gameStatus = NTEngine.GS_WAIT;
     }
 
     //Check for collisions on the X,Y pairs.
