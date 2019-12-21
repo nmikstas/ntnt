@@ -49,11 +49,13 @@ let logKey = function(e)
     if(e.key.toLowerCase() === "k" && !e.repeat)
     {
         console.log("Rotate CCW");
+        ntEngine.ntRequest(NTEngine.GR_ROTATE_CCW);
     }
 
     if(e.key.toLowerCase() === "l" && !e.repeat)
     {
         console.log("Rotate CW");
+        ntEngine.ntRequest(NTEngine.GR_ROTATE_CW);
     }
 
     if(e.key.toLowerCase() === "p" && !e.repeat)
@@ -133,10 +135,16 @@ setInterval(function()
 
 $( document ).ready(function()
 {
+    $("#line-23").on("click", function()
+    {
+        console.log("Add .23 line");
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, .23);
+    });
+
     $("#line-1").on("click", function()
     {
         console.log("Add 1 line");
-        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, .23);
+        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 1);
     });
 
     $("#line-2").on("click", function()

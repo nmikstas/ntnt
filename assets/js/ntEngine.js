@@ -707,6 +707,7 @@ class NTEngine
         this.pieceNext = this.ntNext();
         this.pieceY = 19;
         this.pieceX = 5;
+        this.pieceRotation = 0;
 
         //Check for lines to remove.
         this.checkRemoveLines();
@@ -724,6 +725,22 @@ class NTEngine
             } 
         }
         return collisionFound;
+    }
+
+    //Rotate a piece clockwise.
+    rotateCW()
+    {
+        this.pieceRotation++;
+        if(this.pieceRotation > 3) this.pieceRotation = 0;
+        this.lastRequestStatus = NTEngine.LRS_ACCEPT;
+    }
+
+    //Rotate a piece counter clockwise.
+    rotateCCW()
+    {
+        this.pieceRotation--;
+        if(this.pieceRotation < 0) this.pieceRotation = 3;
+        this.lastRequestStatus = NTEngine.LRS_ACCEPT;
     }
 
     //Move a piece 1 place to the left.
@@ -799,12 +816,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
+                                (this.checkCollisions([{y: 1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+                                
                             case 1:
+                                (this.pieceX === 9 || this.checkCollisions([{y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             case 2:
+                                (this.checkCollisions([{y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.checkCollisions([{y: 0, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
                         }
                         break;
@@ -813,12 +841,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
+                                (this.checkCollisions([{y: 1, x: 0}, {y: -1, x: -1}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             case 1:
+                                (this.pieceX === 9 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             case 2:
+                                (this.checkCollisions([{y: 1, x: 0}, {y: 1, x: 1}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.checkCollisions([{y: 0, x: -1}, {y: 0, x: 1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
                         }
                         break;
@@ -828,13 +867,19 @@ class NTEngine
                         {
                             case 0:
                             case 2:
+                                (this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.checkCollisions([{y: 0, x: -1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
                         }
                         break;
 
                     case NTEngine.PIECE_SQR:
+                        this.rotateCW();
                         break;
 
                     case NTEngine.PIECE_S:
@@ -842,8 +887,13 @@ class NTEngine
                         {
                             case 0:
                             case 2:
+                                (this.checkCollisions([{y: 1, x: 0}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.checkCollisions([{y: -1, x: -1}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
                         }
                         break;
@@ -852,12 +902,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
+                                (this.checkCollisions([{y: 1, x: -1}, {y: 1, x: 0}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             case 1:
+                                (this.pieceX === 9 || this.checkCollisions([{y: 1, x: 1}, {y: 0, x: -1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             case 2:
+                                (this.checkCollisions([{y: 1, x: 0}, {y: -1, x: 0}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.checkCollisions([{y: 0, x: -1}, {y: -1, x: -1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
                         }
                         break;
@@ -867,8 +928,14 @@ class NTEngine
                         {
                             case 0:
                             case 2:
+                                (this.checkCollisions([{y: 2, x: 0}, {y: 1, x: 0}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.pieceX === 1 || this.pieceX === 9 ||
+                                    this.checkCollisions([{y: 0, x: -2}, {y: 0, x: -1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCW();
                                 break;
                         }
                         break;
@@ -884,12 +951,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
+                                (this.checkCollisions([{y: 1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             case 1:
+                                (this.pieceX === 9 || this.checkCollisions([{y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             case 2:
+                                (this.checkCollisions([{y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.checkCollisions([{y: 0, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
                         }
                         break;
@@ -898,12 +976,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
+                                (this.checkCollisions([{y: 1, x: 0}, {y: -1, x: 0}, {y: 1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             case 1:
+                                (this.pieceX === 0 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             case 2:
+                                (this.checkCollisions([{y: 1, x: 0}, {y: -1, x: -1}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             default:
+                                (this.pieceX === 9 || this.checkCollisions([{y: 0, x: -1}, {y: 0, x: 1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
                         }
                         break;
@@ -913,13 +1002,19 @@ class NTEngine
                         {
                             case 0:
                             case 2:
+                                (this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.checkCollisions([{y: 0, x: -1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
                         }
                         break;
 
                     case NTEngine.PIECE_SQR:
+                        this.rotateCCW();
                         break;
 
                     case NTEngine.PIECE_S:
@@ -927,8 +1022,13 @@ class NTEngine
                         {
                             case 0:
                             case 2:
+                                (this.checkCollisions([{y: 1, x: 0}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.checkCollisions([{y: -1, x: -1}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
                         }
                         break;
@@ -937,12 +1037,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
+                                (this.checkCollisions([{y: 1, x: 0}, {y: -1, x: 0}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             case 1:
+                                (this.pieceX === 0 || this.checkCollisions([{y: 0, x: -1}, {y: 1, x: 1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             case 2:
+                                (this.checkCollisions([{y: 1, x: -1}, {y: 1, x: 0}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             default:
+                                (this.pieceX === 9 || this.checkCollisions([{y: 0, x: -1}, {y: -1, x: -1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
                         }
                         break;
@@ -952,8 +1063,14 @@ class NTEngine
                         {
                             case 0:
                             case 2:
+                                (this.checkCollisions([{y: 2, x: 0}, {y: 1, x: 0}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
+
                             default:
+                                (this.pieceX === 0 || this.pieceX === 1 || this.pieceX === 9 ||
+                                    this.checkCollisions([{y: 0, x: -2}, {y: 0, x: -1}, {y: 0, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.rotateCCW();
                                 break;
                         }
                         break;
@@ -976,21 +1093,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision left.
                                 (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -1}, {y: 0, x: -2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             case 1:
-
+                                (this.pieceX === 1 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -2}, {y: -1, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             case 2:
-
+                                (this.pieceX === 1 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             default:
-
+                                (this.pieceX === 0 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -1}, {y: -1, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
                         }
                         break;
@@ -999,21 +1118,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision left.
                                 (this.pieceX === 1 || this.checkCollisions([{y: -1, x: 0}, {y: 0, x: -2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             case 1:
-
+                                (this.pieceX === 1 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -1}, {y: -1, x: -2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             case 2:
-
+                                (this.pieceX === 1 || this.checkCollisions([{y: 1, x: -2}, {y: 0, x: -2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             default:
-
+                                (this.pieceX === 0 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -1}, {y: -1, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
                         }
                         break;
@@ -1023,19 +1144,18 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision left.
                                 (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -1}, {y: 0, x: -2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             default:
-
+                                (this.pieceX === 0 || this.checkCollisions([{y: 1, x: 0}, {y: 0, x: -1}, {y: -1, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
                         }
                         break;
 
                     case NTEngine.PIECE_SQR:
-                        //Check for collision left.
                         (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -2}, {y: 0, x: -2}])) ?
                             this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                         break;
@@ -1045,13 +1165,13 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision left.
                                 (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -2}, {y: 0, x: -1}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             default:
-
+                                (this.pieceX === 0 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -1}, {y: -1, x: 0}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
                         }
                         break;
@@ -1060,20 +1180,22 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision left.
                                 (this.pieceX === 1 || this.checkCollisions([{y: -1, x: -2}, {y: 0, x: -2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             case 1:
-
+                                (this.pieceX === 1 || this.checkCollisions([{y: 1, x: -2}, {y: 0, x: -1}, {y: -1, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
                             case 2:
-
+                                (this.pieceX === 1 || this.checkCollisions([{y: 1, x: 0}, {y: 0, x: -2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             default:
-
+                                (this.pieceX === 0 || this.checkCollisions([{y: 1, x: -1}, {y: 0, x: -1}, {y: -1, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
                         }
                         break;
@@ -1083,13 +1205,14 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision left.
                                 (this.pieceX === 2 || this.checkCollisions([{y: 0, x: -3}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
 
                             default:
-
+                                (this.pieceX === 0 ||
+                                    this.checkCollisions([{y: 2, x: -1}, {y: 1, x: -1}, {y: 0, x: -1}, {y: -1, x: -1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceLeft();
                                 break;
                         }
                         break;
@@ -1112,21 +1235,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision right.
                                 (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 1}, {y: 0, x: 2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             case 1:
-
+                                (this.pieceX === 9 || this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             case 2:
-
+                                (this.pieceX === 8 || this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             default:
-
+                                (this.pieceX === 8 || this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 2}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
                         }
                         break;
@@ -1135,21 +1260,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision right.
                                 (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 2}, {y: 0, x: 2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             case 1:
-
+                                (this.pieceX === 9 || this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             case 2:
-
+                                (this.pieceX === 8 || this.checkCollisions([{y: 1, x: 0}, {y: 0, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             default:
-
+                                (this.pieceX === 8 || this.checkCollisions([{y: 1, x: 2}, {y: 0, x: 1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
                         }
                         break;
@@ -1159,19 +1286,18 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision right.
                                 (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 2}, {y: 0, x: 1}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             default:
-
+                                (this.pieceX === 8 || this.checkCollisions([{y: 1, x: 2}, {y: 0, x: 2}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
                         }
                         break;
 
                     case NTEngine.PIECE_SQR:
-                        //Check for collision right.
                         (this.pieceX === 9 || this.checkCollisions([{y: -1, x: 1}, {y: 0, x: 1}])) ?
                             this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                         break;
@@ -1181,13 +1307,13 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision right.
                                 (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 1}, {y: 0, x: 2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             default:
-
+                                (this.pieceX === 8 || this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 2}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
                         }
                         break;
@@ -1196,21 +1322,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision right.
                                 (this.pieceX === 8 || this.checkCollisions([{y: -1, x: 0}, {y: 0, x: 2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             case 1:
-
+                                (this.pieceX === 9 || this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             case 2:
-
+                                (this.pieceX === 8 || this.checkCollisions([{y: 1, x: 2}, {y: 0, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             default:
-
+                                (this.pieceX === 8 || this.checkCollisions([{y: 1, x: 1}, {y: 0, x: 1}, {y: -1, x: 2}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
                         }
                         break;
@@ -1220,13 +1348,13 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision right.
                                 (this.pieceX === 8 || this.checkCollisions([{y: 0, x: 2}])) ?
                                     this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
 
                             default:
-
+                                (this.pieceX === 9 || this.checkCollisions([{y: 2, x: 1}, {y: 1, x: 1}, {y: 0, x: 1}, {y: -1, x: 1}])) ?
+                                    this.lastRequestStatus = NTEngine.LRS_REJECT : this.movePieceRight();
                                 break;
                         }
                         break;
@@ -1249,21 +1377,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision below.
-                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0},
-                                    {y: -1, x: -1}, {y: -1, x: 1}])) ? this.gluePiece() : this.MovePieceDown();
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, {y: -1, x: -1}, {y: -1, x: 1}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             case 1:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: -1, x: -1}, {y: -2, x: 0}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             case 2:
-
+                                (this.pieceY === 0 || this.checkCollisions([{y: -1, x: -1}, {y: -1, x: 0}, {y: -1, x: 1}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             default:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, {y: -1, x: 1}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
                         }
                         break;
@@ -1272,21 +1402,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision below.
-                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 1},
-                                    {y: -1, x: 0}, {y: -1, x: -1}])) ? this.gluePiece() : this.MovePieceDown();
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 1}, {y: -1, x: 0}, {y: -1, x: -1}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             case 1:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: -1}, {y: -2, x: 0}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             case 2:
-
+                                (this.pieceY === 0 || this.checkCollisions([{y: -1, x: -1}, {y: -1, x: 0}, {y: -1, x: 1}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             default:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, {y: 0, x: 1}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
                         }
                         break;
@@ -1296,21 +1428,20 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision below.
-                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, 
-                                    {y: -1, x: -1}, {y: -2, x: 1}])) ? this.gluePiece() : this.MovePieceDown();
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, {y: -1, x: -1}, {y: -2, x: 1}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             default:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, {y: -1, x: 1}])) ? 
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
                         }
                         break;
 
                     case NTEngine.PIECE_SQR:
-                        //Check for collision below.
-                        (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0},
-                            {y: -2, x: -1}])) ? this.gluePiece() : this.pieceY--;
+                        (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, {y: -2, x: -1}])) ?
+                            this.gluePiece() : this.MovePieceDown();
                         break;
 
                     case NTEngine.PIECE_S:
@@ -1318,13 +1449,13 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision below.
-                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0},
-                                    {y: -2, x: -1}, {y: -1, x: 1}])) ? this.gluePiece() : this.MovePieceDown();
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, {y: -2, x: -1}, {y: -1, x: 1}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             default:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: -1, x: 0}, {y: -2, x: 1}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
                         }
                         break;
@@ -1333,21 +1464,23 @@ class NTEngine
                         switch(this.pieceRotation)
                         {
                             case 0:
-                                //Check for collision below.
-                                (this.pieceY === 1 || this.checkCollisions([{y: -1, x: 0},
-                                    {y: -1, x: 1}, {y: -2, x: -1}])) ? this.gluePiece() : this.MovePieceDown();
+                                (this.pieceY === 1 || this.checkCollisions([{y: -1, x: 0}, {y: -1, x: 1}, {y: -2, x: -1}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             case 1:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: 0, x: -1}, {y: -2, x: 0}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             case 2:
-
+                                (this.pieceY === 0 || this.checkCollisions([{y: -1, x: -1}, {y: -1, x: 0}, {y: -1, x: 1}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
 
                             default:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}, {y: -2, x: 1}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
                         }
                         break;
@@ -1357,13 +1490,14 @@ class NTEngine
                         {
                             case 0:
                             case 2:
-                                //Check for collision below.
-                                (this.pieceY === 0 || this.checkCollisions([{y: -1, x: 0}, {y: -1, x: 1},
-                                    {y: -1, x: -1}, {y: -1, x: -2}])) ? this.gluePiece() : this.MovePieceDown();
+                                (this.pieceY === 0 ||
+                                    this.checkCollisions([{y: -1, x: 0}, {y: -1, x: 1}, {y: -1, x: -1}, {y: -1, x: -2}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break
                     
                             default:
-
+                                (this.pieceY === 1 || this.checkCollisions([{y: -2, x: 0}])) ?
+                                    this.gluePiece() : this.MovePieceDown();
                                 break;
                         }
                         break;
