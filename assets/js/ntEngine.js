@@ -144,14 +144,12 @@ class NTEngine
 
     constructor(rndSeed, statusCallback)
     {
-        this.rndSeed        = rndSeed;
         this.statusCallback = statusCallback;
 
         //Seed the RNG.
         this._seed;
-        this.ntRandom(this.rndSeed);
-        this.ntNext();
-
+        this.rndSeed = rndSeed;
+  
         //Interval timer.
         this.timer;
 
@@ -455,9 +453,18 @@ class NTEngine
         return this._seed % 7;
     }
 
+    //Reseed the RNG.
+    ntReseed(newSeed)
+    {
+        this.rndSeed = newSeed;
+        this.ntRandom(this.rndSeed);
+        this.ntNext();
+    }
+
     //Prime the random number sequence with unique numbers.
     ntRandPrime()
     {
+        this.ntReseed(this.rndSeed);
         this.pieceCurrent = this.ntNext();
 
         do
@@ -485,6 +492,8 @@ class NTEngine
         } 
         while(this.pieceThird === this.pieceCurrent || this.pieceThird === this.pieceNext);
     }
+
+    /******************************************* Reset *******************************************/
 
     //Used by outside code to get the current game status.
     ntStatus()
@@ -1627,8 +1636,18 @@ class NTEngine
                 this.ntReset(param);
                 break;
 
+            //This allows the RNG to be reseeded so all players have the same piece sequence.
             case NTEngine.GR_RESEED:
+                let reseedParam = parseInt(param);
 
+                if(isNaN(param))
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    break;
+                }
+
+                this.lastRequestStatus = NTEngine.LRS_ACCEPT;
+                this.ntReseed(reseedParam);
                 break;
 
             default:

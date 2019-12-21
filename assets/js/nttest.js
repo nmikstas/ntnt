@@ -137,50 +137,60 @@ $( document ).ready(function()
 {
     $("#line-23").on("click", function()
     {
-        console.log("Add .23 line");
+        //console.log("Add .23 line");
         ntEngine.ntRequest(NTEngine.GR_ADD_LINES, .23);
     });
 
     $("#line-1").on("click", function()
     {
-        console.log("Add 1 line");
+        //console.log("Add 1 line");
         ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 1);
     });
 
     $("#line-2").on("click", function()
     {
-        console.log("Add 2 lines");
+        //console.log("Add 2 lines");
         ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 2);
     });
 
     $("#line-5").on("click", function()
     {
-        console.log("Add 5 lines");
+        //console.log("Add 5 lines");
         ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 5);
     });
 
     $("#line-10").on("click", function()
     {
-        console.log("Add 10 lines");
+        //console.log("Add 10 lines");
         ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 10);
     });
 
     $("#line-18").on("click", function()
     {
-        console.log("Add 18 lines");
+        //console.log("Add 18 lines");
         ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 18);
     });
 
     $("#line-25").on("click", function()
     {
-        console.log("Add 25 lines");
+        //console.log("Add 25 lines");
         ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 25);
     });
 
     $("#seed-btn").on("click", function(event)
     {
         event.preventDefault();
-        console.log("Reseed RNG");
+
+        let seedValue = parseInt($("#seed-text").val().trim());
+        
+        if(isNaN(seedValue))
+        {
+            $("#seed-text").val("");
+            return;
+        }
+
+        console.log("Reseed Value: " + seedValue);
+        ntEngine.ntRequest(NTEngine.GR_RESEED, seedValue);
     });
 });
 
