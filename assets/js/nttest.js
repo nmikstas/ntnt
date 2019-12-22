@@ -60,7 +60,8 @@ let logKey = function(e)
 
     if(e.key.toLowerCase() === "p" && !e.repeat)
     {
-        console.log("Toggle Pause");
+        //console.log("Toggle Pause");
+        ntEngine.ntRequest(NTEngine.GR_PAUSE);
     }
 
     if(e.key.toLowerCase() === "r" && !e.repeat)
@@ -384,67 +385,64 @@ let render = function(status)
     //Exit if the game is over.
     if(gameStatus === NTEngine.GS_OVER && !isStarted) return;
 
-    //Render the next piece.
-    switch(pieceNext)
+    //Render the next piece only if game is not paused.
+    if(gameStatus !== NTEngine.GS_PAUSE)
     {
-        case NTEngine.PIECE_T:
-            nextPiece[1][3].css("background-color", colors[1]);
-            nextPiece[2][3].css("background-color", colors[1]);
-            nextPiece[2][4].css("background-color", colors[1]);
-            nextPiece[2][2].css("background-color", colors[1]);
+        switch(pieceNext)
+        {
+            case NTEngine.PIECE_T:
+                nextPiece[1][3].css("background-color", colors[1]);
+                nextPiece[2][3].css("background-color", colors[1]);
+                nextPiece[2][4].css("background-color", colors[1]);
+                nextPiece[2][2].css("background-color", colors[1]);
+                break;
+
+            case NTEngine.PIECE_BKL:
+                nextPiece[1][4].css("background-color", colors[2]);
+                nextPiece[2][4].css("background-color", colors[2]);
+                nextPiece[2][3].css("background-color", colors[2]);
+                nextPiece[2][2].css("background-color", colors[2]);
             break;
 
-        case NTEngine.PIECE_BKL:
-            nextPiece[1][4].css("background-color", colors[2]);
-            nextPiece[2][4].css("background-color", colors[2]);
-            nextPiece[2][3].css("background-color", colors[2]);
-            nextPiece[2][2].css("background-color", colors[2]);
-        break;
+            case NTEngine.PIECE_Z:
+                nextPiece[1][3].css("background-color", colors[3]);
+                nextPiece[2][3].css("background-color", colors[3]);
+                nextPiece[1][4].css("background-color", colors[3]);
+                nextPiece[2][2].css("background-color", colors[3]);
+                break;
 
-        case NTEngine.PIECE_Z:
-            nextPiece[1][3].css("background-color", colors[3]);
-            nextPiece[2][3].css("background-color", colors[3]);
-            nextPiece[1][4].css("background-color", colors[3]);
-            nextPiece[2][2].css("background-color", colors[3]);
-            break;
+            case NTEngine.PIECE_SQR:
+                nextPiece[1][2].css("background-color", colors[1]);
+                nextPiece[1][3].css("background-color", colors[1]);
+                nextPiece[2][2].css("background-color", colors[1]);
+                nextPiece[2][3].css("background-color", colors[1]);
+                break;
 
-        case NTEngine.PIECE_SQR:
-            nextPiece[1][2].css("background-color", colors[1]);
-            nextPiece[1][3].css("background-color", colors[1]);
-            nextPiece[2][2].css("background-color", colors[1]);
-            nextPiece[2][3].css("background-color", colors[1]);
-            break;
+            case NTEngine.PIECE_S:
+                nextPiece[1][2].css("background-color", colors[2]);
+                nextPiece[1][3].css("background-color", colors[2]);
+                nextPiece[2][3].css("background-color", colors[2]);
+                nextPiece[2][4].css("background-color", colors[2]);
+                break;
 
-        case NTEngine.PIECE_S:
-            nextPiece[1][2].css("background-color", colors[2]);
-            nextPiece[1][3].css("background-color", colors[2]);
-            nextPiece[2][3].css("background-color", colors[2]);
-            nextPiece[2][4].css("background-color", colors[2]);
-            break;
+            case NTEngine.PIECE_L:
+                nextPiece[1][2].css("background-color", colors[3]);
+                nextPiece[2][2].css("background-color", colors[3]);
+                nextPiece[2][3].css("background-color", colors[3]);
+                nextPiece[2][4].css("background-color", colors[3]);
+                break;
 
-        case NTEngine.PIECE_L:
-            nextPiece[1][2].css("background-color", colors[3]);
-            nextPiece[2][2].css("background-color", colors[3]);
-            nextPiece[2][3].css("background-color", colors[3]);
-            nextPiece[2][4].css("background-color", colors[3]);
-            break;
-
-        default:
-            nextPiece[1][1].css("background-color", colors[1]);
-            nextPiece[1][2].css("background-color", colors[1]);
-            nextPiece[1][3].css("background-color", colors[1]);
-            nextPiece[1][4].css("background-color", colors[1]);
-            break;
+            default:
+                nextPiece[1][1].css("background-color", colors[1]);
+                nextPiece[1][2].css("background-color", colors[1]);
+                nextPiece[1][3].css("background-color", colors[1]);
+                nextPiece[1][4].css("background-color", colors[1]);
+                break;
+        }
     }
 
     //Remove any borders on next piece blocks.
-    for(let i = 0; i < nextPiece.length; i++)
-    {
-        for(let j = 0; j < nextPiece[i].length; j++)
-        {
-                nextPiece[i][j].css("border", "0");   
-        }
-    }
+    $(".next-span").css("border", "0");
 
     //Add borders on next piece colored blocks.
     for(let i = 0; i < nextPiece.length; i++)
@@ -478,18 +476,14 @@ let render = function(status)
     {
         for(let j = 0; j < 10; j++)
         {
-            playField[i][j].css("background-color", colors[field[i][j]]);
+            //Render the play field only if the game is not paused.
+            playField[i][j].css("background-color", gameStatus !== NTEngine.GS_PAUSE ?
+                colors[field[i][j]] : "rgb(0, 0, 0)");
         }
     }
 
     //Remove any borders on game field blocks.
-    for(let i = 0; i < playField.length; i++)
-    {
-        for(let j = 0; j < playField[i].length; j++)
-        {
-                playField[i][j].css("border", "1px solid #000000");   
-        }
-    }
+    $(".this-span").css("border", "1px solid #000000");
 
     //Add borders on game field colored blocks.
     for(let i = 0; i < playField.length; i++)
@@ -502,6 +496,19 @@ let render = function(status)
                 playField[i][j].css("border", "1px solid #666666");
             }
         }
+    }
+
+    //Indicate the game is paused.
+    if(gameStatus === NTEngine.GS_PAUSE)
+    {
+        let pauseText = $("<h1>");
+        pauseText.addClass("pause-text");
+        pauseText.text("PAUSED");
+        playField[10][2].append(pauseText);
+    }
+    else
+    {
+        $(".this-span").empty();
     }
 
     //Check if block add wait state,

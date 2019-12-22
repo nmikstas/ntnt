@@ -107,6 +107,7 @@ footer
 
 .this-span
 {
+    position: relative;
     box-sizing: border-box;
     height: 30px;
     width: 30px;
@@ -114,7 +115,6 @@ footer
     border: 1px solid #000000;
     display: inline-block;
     text-align: center;
-    padding-top: 12px;
 }
 
 .next-span
@@ -127,4 +127,10 @@ footer
     display: inline-block;
     text-align: center;
     padding-top: 12px;
+}
+
+.pause-text
+{
+    position: absolute;
+    z-index: 3;
 }

@@ -561,11 +561,9 @@ class NTEngine
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
 
-        let self = this;
-
         //Set the piece timer based on the current level.
         clearInterval(this.timer);
-        this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
+        this.timer = setInterval(() => this.ntRequest(NTEngine.GR_DOWN), this.levelTimer(this.currentLevel));
     }
 
     checkGameOver()
@@ -1533,7 +1531,25 @@ class NTEngine
                 break;
 
             case NTEngine.GR_PAUSE:
-
+                if(!this.gameStatus === NTEngine.GS_PLAY && !this.gameStatus === NTEngine.GS_PAUSE)
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    return;
+                }
+                
+                if(this.gameStatus === NTEngine.GS_PLAY)
+                {
+                    this.gameStatus = NTEngine.GS_PAUSE;
+                    clearInterval(this.timer);
+                }
+                else
+                {
+                    this.gameStatus = NTEngine.GS_PLAY;
+                    //Set the piece timer based on the current level.
+                    clearInterval(this.timer);
+                    this.ntRequest(NTEngine.GR_DOWN);
+                    this.timer = setInterval(() => this.ntRequest(NTEngine.GR_DOWN), this.levelTimer(this.currentLevel));
+                }
                 break;
 
             //This resumes gameplay after a piece has been glued to the play field.
@@ -1561,9 +1577,8 @@ class NTEngine
                     //Only resume play if the game is not over.
                     else if(this.gameStatus !== NTEngine.GS_OVER)
                     {
-                        let self = this;
                         clearInterval(this.timer);
-                        this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
+                        this.timer = setInterval(() => this.ntRequest(NTEngine.GR_DOWN), this.levelTimer(this.currentLevel));
                         this.gameStatus = NTEngine.GS_PLAY;
                     }
                     //Otherwise reject the request.
@@ -1589,9 +1604,8 @@ class NTEngine
                     {
                         this.rowsToAddNow = 0;
                         this.blanks = [];
-                        let self = this;
                         clearInterval(this.timer);
-                        this.timer = setInterval(function(){ self.ntRequest(NTEngine.GR_DOWN) }, self.levelTimer(self.currentLevel));
+                        this.timer = setInterval(() => this.ntRequest(NTEngine.GR_DOWN), this.levelTimer(this.currentLevel));
                         this.gameStatus = NTEngine.GS_PLAY;
                     }   
                 }
