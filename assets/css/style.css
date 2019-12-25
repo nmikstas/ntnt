@@ -134,3 +134,10 @@ footer
     position: absolute;
     z-index: 3;
 }
+
+#renderCanvas
+{
+    width: 375px;
+    height: 750px;
+    touch-action: none;
+}
