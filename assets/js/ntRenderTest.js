@@ -25,7 +25,7 @@ let logKey = function(e)
     if(e.key.toLowerCase() === "r" && !e.repeat)
     {
         //console.log("Reset Game");
-        ntEngine.ntRequest(NTEngine.GR_RESET, 9);
+        ntEngine.ntRequest(NTEngine.GR_RESET, 0);
         isStarted = true;
     }
 
@@ -165,7 +165,7 @@ let engine = new BABYLON.Engine(canvas, true, { stencil: true });
 let renderer = new NTRender();
 
 //Call the createScene function.
-var scene = renderer.gfCreateScene(); 
+let scene = renderer.gfCreateScene();
 
 //Register a Babylon render loop to repeatedly render the scene.
 engine.runRenderLoop(function () { scene.render(); });

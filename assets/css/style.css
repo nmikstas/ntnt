@@ -135,9 +135,16 @@ footer
     z-index: 3;
 }
 
+.conatiner
+{
+    padding-left: 0px;
+}
+
 #renderCanvas
 {
-    width: 375px;
-    height: 750px;
+    height: calc(100vh - 175px);
+    width:  calc(50vh);
+    /*width: 375px;*/
+    /*height: 750px;*/
     touch-action: none;
 }

@@ -27,8 +27,40 @@
     </header>
         
     <!--Main content body-->
-    <div id="page-body" class="container">
-        <canvas id="renderCanvas" class="m-3" touch-action="none"></canvas>
+    <div id="page-body" class="container pt-1 pl-1">
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="renderCanvas" touch-action="none"></canvas>
+            </div>
+            <div class="col-md-6">
+                <h4>Next Piece:</h4>
+                <canvas id="pieceCanvas" touch-action="none"></canvas>
+                <h4 class="mt-2" id="h-score">Score: -</h4>
+                <h4 id="h-level">Level: -</h4>
+                <h4 id="h-lines">Lines: -</h4>
+                <h4 id="h-status">Game Status: -</h4>
+                <h4 id="h-request">Last Request: -</h4>
+                <div class="border">
+                    <h4 class="m-2">Add Lines to Play Field</h4>
+                    <button type="button" id="line-23" class="btn btn-primary m-2">Add .23 Lines</button>
+                    <button type="button" id="line-1" class="btn btn-primary m-2">Add 1 Line</button>
+                    <button type="button" id="line-2" class="btn btn-primary m-2">Add 2 Lines</button>
+                    <button type="button" id="line-5" class="btn btn-primary m-2">Add 5 Lines</button>
+                    <button type="button" id="line-10" class="btn btn-primary m-2">Add 10 Lines</button>
+                    <button type="button" id="line-18" class="btn btn-primary m-2">Add 18 Lines</button>
+                    <button type="button" id="line-25" class="btn btn-primary m-2">Add 25 Lines</button>
+                </div>
+                <div class="border mt-2">
+                    <h4 class="m-2">Reseed RNG</h4>
+                    <form>
+                        <div class="input-group mt-2 p-2">
+                            <input type="text" class="form-control" id="seed-text" placeholder="Enter seed value">
+                            <input type="submit" class="btn btn-success m-2" id="seed-btn" value="Reseed">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
         
     <!--Footer-->

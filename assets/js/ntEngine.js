@@ -1531,24 +1531,26 @@ class NTEngine
                 break;
 
             case NTEngine.GR_PAUSE:
-                if(!this.gameStatus === NTEngine.GS_PLAY && !this.gameStatus === NTEngine.GS_PAUSE)
+                if(this.gameStatus === NTEngine.GS_PLAY || this.gameStatus === NTEngine.GS_PAUSE)
                 {
-                    this.lastRequestStatus = NTEngine.LRS_REJECT;
-                    return;
-                }
-                
-                if(this.gameStatus === NTEngine.GS_PLAY)
-                {
-                    this.gameStatus = NTEngine.GS_PAUSE;
-                    clearInterval(this.timer);
+                    
+                    if(this.gameStatus === NTEngine.GS_PLAY)
+                    {
+                        this.gameStatus = NTEngine.GS_PAUSE;
+                        clearInterval(this.timer);
+                    }
+                    else
+                    {
+                        this.gameStatus = NTEngine.GS_PLAY;
+                        //Set the piece timer based on the current level.
+                        clearInterval(this.timer);
+                        this.ntRequest(NTEngine.GR_DOWN);
+                        this.timer = setInterval(() => this.ntRequest(NTEngine.GR_DOWN), this.levelTimer(this.currentLevel));
+                    }
                 }
                 else
                 {
-                    this.gameStatus = NTEngine.GS_PLAY;
-                    //Set the piece timer based on the current level.
-                    clearInterval(this.timer);
-                    this.ntRequest(NTEngine.GR_DOWN);
-                    this.timer = setInterval(() => this.ntRequest(NTEngine.GR_DOWN), this.levelTimer(this.currentLevel));
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
                 }
                 break;
 

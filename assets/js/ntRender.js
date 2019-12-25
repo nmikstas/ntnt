@@ -38,44 +38,44 @@ class NTRender
         this.blockColors =
         [
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(0, .087*this.gm, .246*this.gm), 
-                new BABYLON.Color3(.062*this.gm, .190*this.gm, .255*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(0, .087*this.gm, .246*this.gm), 
+                new BABYLON.Color3(.062*this.gm, .190*this.gm, .255*this.gm), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(0, .168*this.gm, 0), 
-                new BABYLON.Color3(.128*this.gm, .208*this.gm, .016*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(0, .168*this.gm, 0), 
+                new BABYLON.Color3(.128*this.gm, .208*this.gm, .016*this.gm), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(.219*this.gm, 0, .205*this.gm), 
-                new BABYLON.Color3(.248*this.gm, .120*this.gm, .248*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(.219*this.gm, 0, .205*this.gm), 
+                new BABYLON.Color3(.248*this.gm, .120*this.gm, .248*this.gm), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(0, .088*this.gm, .248*this.gm), 
-                new BABYLON.Color3(.091*this.gm, .219*this.gm, .087*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(0, .088*this.gm, .248*this.gm), 
+                new BABYLON.Color3(.091*this.gm, .219*this.gm, .087*this.gm), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(.231*this.gm, 0, .091*this.gm), 
-                new BABYLON.Color3(.088*this.gm, .248*this.gm, .152*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(.231*this.gm, 0, .091*this.gm), 
+                new BABYLON.Color3(.088*this.gm, .248*this.gm, .152*this.gm), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(.088*this.gm, .248*this.gm, .152*this.gm), 
-                new BABYLON.Color3(.107*this.gm, .136*this.gm, .255*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(.088*this.gm, .248*this.gm, .152*this.gm), 
+                new BABYLON.Color3(.107*this.gm, .136*this.gm, .255*this.gm), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(.248*this.gm, .056*this.gm, 0), 
-                new BABYLON.Color3(.127*this.gm, .127*this.gm, .127*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(.248*this.gm, .056*this.gm, 0), 
+                new BABYLON.Color3(.127*this.gm, .127*this.gm, .127*this.gm), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(.107*this.gm, .071*this.gm, .255*this.gm), 
-                new BABYLON.Color3(.171*this.gm, 0, .035*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(.107*this.gm, .071*this.gm, .255*this.gm), 
+                new BABYLON.Color3(.171*this.gm, 0, .035*this.gm), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126*this.gm, .126*this.gm, .126*this.gm), new BABYLON.Color3(0, .088*this.gm, .248*this.gm), 
-                new BABYLON.Color3(.248*this.gm, .056*this.gm, 0), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(0, .088*this.gm, .248*this.gm), 
+                new BABYLON.Color3(.248*this.gm, .056*this.gm, 0), new BABYLON.Color3(0, 0, 0)
             ],
             [
-                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.126, .126, .126), new BABYLON.Color3(.248, .056, 0), 
-                new BABYLON.Color3(.255*this.gm, .163*this.gm, .071*this.gm), new BABYLON.Color3(.116*this.gm, .116*this.gm, .116*this.gm)
+                new BABYLON.Color3(0, 0, 0), new BABYLON.Color3(.252*this.gm, .252*this.gm, .252*this.gm), new BABYLON.Color3(.248, .056, 0), 
+                new BABYLON.Color3(.255*this.gm, .163*this.gm, .071*this.gm), new BABYLON.Color3(0, 0, 0)
             ]
         ]
     }
@@ -112,19 +112,29 @@ class NTRender
         }
     }
 
-    /*********************************** Main Babylon Function ***********************************/
+    /********************************** Main Babylon Functions ***********************************/
 
+    //This function renders the game field.
     gfCreateScene = () =>
     {
         //Create the scene space
         let scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3(.3, 0, .5);
 
         //Add a camera to the scene and attach it to the canvas.  Centered on the playfield.
         let camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 25, new BABYLON.Vector3(4.5, 9.5, 0), scene);
         camera.attachControl(canvas, true);
-        camera.lowerRadiusLimit = 15;
-        camera.upperRadiusLimit = 50;
+        camera.keysDown             = [98];
+        camera.keysUp               = [104];
+        camera.keysLeft             = [100];
+        camera.keysRight            = [102];
+        camera.lowerRadiusLimit     = 15;
+        camera.upperRadiusLimit     = 50;
         camera.wheelDeltaPercentage = .01;
+        camera.upperAlphaLimit      = 3 * Math.PI / 4;
+        camera.lowerAlphaLimit      = Math.PI / 4;
+        camera.upperBetaLimit       = 3 * Math.PI / 4;
+        camera.lowerBetaLimit       = Math.PI / 4;
 
         //Add lights to the scene
         let light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), scene);
