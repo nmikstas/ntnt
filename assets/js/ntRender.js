@@ -1,13 +1,15 @@
 
 class NTRender
 {
-    constructor()
+    constructor(statsCallback)
     {
-        this.gm = 1.5; //Glow multiplier.
-        this.lightOffset = 0; //Used to move the lighting around the scene.
+        this.statsCallback = statsCallback; //Callback used for displaying the game stats.
+        this.gm = 1.5;                      //Glow multiplier.
+        this.lightOffset = 0;               //Used to move the lighting around the scene.
         this.currentLevel;
 
         this.boxArr = []; //Array of all the game field pieces.
+        this.npArr  = []; //Array of next piece boxes.
         this.matArr = []; //Array of materials.
 
         this.renderFieldArr =  //2D array sent by game engine.
@@ -98,6 +100,13 @@ class NTRender
         }
 
         let gameStatus = status.gameStatus;
+        let level      = status.currentLevel;
+        let score      = status.currentScore;
+        let request    = status.lastRequestStatus;
+        let lines      = status.linesCleared;
+
+        //Send stats to function to be displayed to the user.
+        this.statsCallback(level, score, lines, gameStatus, request);
 
         //Check if animation wait state.
         if(gameStatus === NTEngine.GS_WAIT)
@@ -184,7 +193,6 @@ class NTRender
             {
                 let fgBox = BABYLON.MeshBuilder.CreateBox("box" + i + j, {height: 1, width: 1, depth: 1}, scene);
                 fgBox.position = new BABYLON.Vector3(9 - j, i, 0);
-                //fgBox.material = blockMat;
                 blockRow.push(fgBox);
             }
             this.boxArr.push(blockRow);
@@ -214,6 +222,43 @@ class NTRender
             }
         });
 
+        return scene;
+    };
+
+    //This function renders the next piece.
+    npCreateScene = () =>
+    {
+        //Create the scene space
+        let scene = new BABYLON.Scene(npEngine);
+        scene.clearColor = new BABYLON.Color3(0, 0, 0);
+
+        //Add a camera to the scene and attach it to the canvas.
+        let camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 25, new BABYLON.Vector3(0, 0, -20), scene);
+        camera.attachControl(canvas, true);
+
+        //Add lights to the scene
+        let light = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 0, 1), scene);
+        let gl = new BABYLON.GlowLayer("glow", scene);
+
+        //Add blocks to the scene.
+        for(let i = 0; i < 2; i++)
+        {
+            let blockRow = [];
+            for(let j = 0; j < 4; j++)
+            {
+                let npBox = BABYLON.MeshBuilder.CreateBox("npBox" + i + j, {height: .9, width: .9, depth: .9}, scene);
+                npBox.position = new BABYLON.Vector3(j, i, 0);
+                blockRow.push(npBox);
+            }
+            this.npArr.push(blockRow);
+        }
+
+        //This is where all the changes in the game happen.
+        scene.registerBeforeRender(() =>
+        {
+
+        });
+        
         return scene;
     };
 }
