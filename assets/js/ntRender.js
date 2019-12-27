@@ -10,7 +10,9 @@ class NTRender
         this.pieceNext     = 0;
         this.pieceThird    = 0;
         this.gameStatus    = NTEngine.GS_OVER;
+        this.lastStatus    = NTEngine.GS_OVER;
         this.cameraOffset  = 0;
+        this.lastLevel     = -1;
 
         //Animation variables.
         this.rowsToErase   = [];
@@ -23,6 +25,17 @@ class NTRender
         this.glueTimer;
         this.animTimer;
         this.blocksTimer;
+
+        //SFX trigger variables.
+        this.pauseSFX  = false;
+        this.rotateSFX = false;
+        this.moveSFX   = false;
+        this.dropSFX   = false;
+        this.tetrisSFX = false;
+        this.lineSFX   = false;
+        this.levelSFX  = false;
+        this.overSFX   = false;
+        this.startSFX  = false; 
 
         this.boxArr = []; //Array of all the game field pieces.
         this.npArr  = []; //Array of next piece boxes.
@@ -115,6 +128,7 @@ class NTRender
             return;
         }
 
+        this.dropSFX = true;
         this.blocksCounter++;
     }
 
@@ -160,13 +174,90 @@ class NTRender
     gfRender = (status) =>
     {
         //Copy variables needed to run the game.
-        this.gameStatus   = status.gameStatus;
-        this.currentLevel = status.currentLevel;
-        this.pieceCurrent = status.pieceCurrent;
-        this.pieceNext    = status.pieceNext;
-        this.pieceThird   = status.pieceThird;
-        this.rowsToErase  = status.rowsToErase;
-        let field = [];
+        this.gameStatus        = status.gameStatus;
+        this.lastRequest       = status.lastRequest;
+        this.lastRequestStatus = status.lastRequestStatus;
+        this.currentLevel      = status.currentLevel;
+        this.pieceCurrent      = status.pieceCurrent;
+        this.pieceNext         = status.pieceNext;
+        this.pieceThird        = status.pieceThird;
+        this.rowsToErase       = status.rowsToErase;
+        let field              = [];
+
+        //Pause SFX.
+        if(this.lastRequest === NTEngine.GR_PAUSE && this.lastRequestStatus === NTEngine.LRS_ACCEPT)
+        {
+            this.pauseSFX = true;
+        }
+
+        //Rotate SFX.
+        if(this.lastRequest === NTEngine.GR_ROTATE_CW && this.lastRequestStatus === NTEngine.LRS_ACCEPT)
+        {
+            this.rotateSFX = true;
+        }
+
+        //Rotate SFX.
+        if(this.lastRequest === NTEngine.GR_ROTATE_CCW && this.lastRequestStatus === NTEngine.LRS_ACCEPT)
+        {
+            this.rotateSFX = true;
+        }
+
+        //Move SFX.
+        if(this.lastRequest === NTEngine.GR_LEFT && this.lastRequestStatus === NTEngine.LRS_ACCEPT)
+        {
+            this.moveSFX = true;
+        }
+
+        //Move SFX.
+        if(this.lastRequest === NTEngine.GR_RIGHT && this.lastRequestStatus === NTEngine.LRS_ACCEPT)
+        {
+            this.moveSFX = true;
+        }
+
+        //Drop SFX.
+        if(this.gameStatus === NTEngine.GS_WAIT && !this.rowsToErase.length)
+        {
+            this.dropSFX = true;
+        }
+
+        //Tetris SFX.
+        if(this.gameStatus === NTEngine.GS_WAIT && this.rowsToErase.length === 4)
+        {
+            this.tetrisSFX = true;
+        }
+        //Level SFX.
+        else if(this.lastLevel >= 0 && this.currentLevel !== this.lastLevel)
+        {
+            this.levelSFX = true;
+            this.lastLevel = this.currentLevel;
+        }
+        //Line SFX.
+        else if(this.gameStatus === NTEngine.GS_WAIT && this.rowsToErase.length > 0)
+        {
+            this.lineSFX = true;
+        }
+
+        //Check if game was just started.
+        if(this.gameStatus === NTEngine.GS_PLAY && this.lastStatus === NTEngine.GS_OVER)
+        {
+            this.startSFX = true;
+        }
+
+        //Check if game just ended.
+        if(this.gameStatus === NTEngine.GS_OVER && this.lastStatus !== NTEngine.GS_OVER)
+        {
+            this.overSFX = true;
+            this.lastLevel = -1;
+        }
+
+        //Update the level on the first piece.
+        if(this.lastLevel < 0 && this.gameStatus !== NTEngine.GS_OVER)
+        {
+            this.lastLevel = this.currentLevel;
+        }
+
+        //Update the last status.
+        this.lastStatus = this.gameStatus;
 
         //During animations, hide the piece at the top of the play field.
         (this.gameStatus === NTEngine.GS_WAIT_BLK || this.gameStatus === NTEngine.GS_WAIT) ? field = getField() : field = status.gameField;
@@ -255,6 +346,33 @@ class NTRender
         camera.upperBetaLimit       = 3 * Math.PI / 4;
         camera.lowerBetaLimit       = Math.PI / 4;
 
+        //Pause SFX.
+        var tPause = new BABYLON.Sound("pauseSFX", "https://nmikstas.github.io/resources/audio/tPause.ogg", scene, null);
+
+        //Rotate SFX.
+        var tRotate = new BABYLON.Sound("rotateSFX", "https://nmikstas.github.io/resources/audio/tRotate.ogg", scene, null);
+
+        //Move SFX.
+        var tMove = new BABYLON.Sound("moveSFX", "https://nmikstas.github.io/resources/audio/tMove.ogg", scene, null);
+
+        //Drop SFX.
+        var tDrop = new BABYLON.Sound("dropSFX", "https://nmikstas.github.io/resources/audio/tDrop.ogg", scene, null);
+
+        //Tetris SFX.
+        var tTetris = new BABYLON.Sound("tetrisSFX", "https://nmikstas.github.io/resources/audio/tTetris.ogg", scene, null);
+
+        //Line clear SFX.
+        var tLine = new BABYLON.Sound("lineSFX", "https://nmikstas.github.io/resources/audio/tLine.ogg", scene, null);
+
+        //Level up SFX.
+        var tLevel = new BABYLON.Sound("levelSFX", "https://nmikstas.github.io/resources/audio/tlLevel.ogg", scene, null);
+
+        //Start SFX.
+        var tStart = new BABYLON.Sound("startSFX", "https://nmikstas.github.io/resources/audio/tStart.ogg", scene, null);
+
+        //Game over SFX.
+        var tOver = new BABYLON.Sound("overSFX", "https://nmikstas.github.io/resources/audio/tOver.ogg", scene, null);
+
         //Add lights to the scene
         let light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), scene);
         let gl = new BABYLON.GlowLayer("glow", scene);
@@ -315,18 +433,103 @@ class NTRender
             this.boxArr.push(blockRow);
         }
 
+        //Create a banner that says "PAUSED".
+        let font_size = 48;
+	    let font = "bold " + font_size + "px Arial"; //Set font
+        let planeHeight = 3;                         //Set height for plane
+        let DTHeight = 1.5 * font_size;              //Set height for dynamic texture
+        let ratio = planeHeight/DTHeight;            //Calculate ratio
+        let text = "PAUSED";                         //Set text
+	
+	    //Use a temporay dynamic texture to calculate the length of the text on the dynamic texture canvas
+        let temp = new BABYLON.DynamicTexture("DynamicTexture", 64, scene);
+	    let tmpctx = temp.getContext();
+	    tmpctx.font = font;
+        let DTWidth = tmpctx.measureText(text).width + 8;
+    
+        //Calculate width the plane has to be 
+        let planeWidth = DTWidth * ratio;
+
+        //Create dynamic texture and write the text
+        let dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", {width:DTWidth, height:DTHeight}, scene, false);
+        let mat = new BABYLON.StandardMaterial("mat", scene);
+        mat.diffuseTexture = dynamicTexture;
+        mat.emissiveColor = new BABYLON.Color3(0, 0, 1);
+        dynamicTexture.drawText(text, null, null, font, "#000000", "#ffffff", true);
+    
+        //Create plane and set dynamic texture as material
+        let plane = BABYLON.MeshBuilder.CreatePlane("plane", {width:planeWidth, height:planeHeight}, scene);
+        plane.material = mat;
+        plane.position =  new BABYLON.Vector3(4.5, 9.5, -.45);
+        plane.rotation.y = Math.PI;
+        
         //This is where all the changes in the game happen.
         scene.registerBeforeRender(() =>
         {
             let colorIndex    = this.currentLevel % 10;
             light2.position   = new BABYLON.Vector3(4.5 + 7 * Math.cos(this.lightOffset), 9.5 + 14 * Math.sin(this.lightOffset), 5);
             this.lightOffset += .002;
+
+            //Check for SFX triggers.
+            if(this.pauseSFX)
+            {
+                this.pauseSFX = false;
+                tPause.play();
+            }
+
+            if(this.rotateSFX)
+            {
+                this.rotateSFX = false;
+                tRotate.play();
+            }
+
+            if(this.moveSFX)
+            {
+                this.moveSFX = false;
+                tMove.play();
+            }
+
+            if(this.dropSFX)
+            {
+                this.dropSFX = false;
+                tDrop.play();
+            }
+
+            if(this.tetrisSFX)
+            {
+                this.tetrisSFX = false;
+                tTetris.play();
+            }
+
+            if(this.lineSFX)
+            {
+                this.lineSFX = false;
+                tLine.play();
+            }
+
+            if(this.levelSFX)
+            {
+                this.levelSFX = false;
+                tLevel.play();
+            }
+
+            if(this.startSFX)
+            {
+                this.startSFX = false;
+                tStart.play();
+            }
+
+            if(this.overSFX)
+            {
+                this.overSFX = false;
+                tOver.play();
+            }
             
             for(let i = 0; i < this.boxArr.length; i++)
             {
                 for(let j = 0; j < this.boxArr[i].length; j++)
                 {
-                    if(this.renderFieldArr[i][j])
+                    if(this.renderFieldArr[i][j] && this.gameStatus !== NTEngine.GS_PAUSE)
                     {
                         this.boxArr[i][j].isVisible = true;
                         this.boxArr[i][j].material = this.matArr[colorIndex][this.renderFieldArr[i][j]];
@@ -336,6 +539,16 @@ class NTRender
                         this.boxArr[i][j].isVisible = false;
                     }
                 }
+            }
+
+            //Check if the game is paused.
+            if(this.gameStatus === NTEngine.GS_PAUSE)
+            {
+                plane.isVisible = true;
+            }
+            else
+            {
+                plane.isVisible = false;
             }
 
             //Special animation for 4 rows cleared.

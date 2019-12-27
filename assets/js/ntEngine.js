@@ -154,11 +154,12 @@ class NTEngine
         this.timer;
 
         //Game engine variables.
-        this.gameStatus = NTEngine.GS_OVER;
+        this.gameStatus        = NTEngine.GS_OVER;
+        this.lastRequest       = NTEngine.GR_NONE;
         this.lastRequestStatus = NTEngine.LRS_NONE;
-        this.currentLevel   = 0;
-        this.currentScore   = 0;
-        this.linesCleared   = 0;
+        this.currentLevel      = 0;
+        this.currentScore      = 0;
+        this.linesCleared      = 0;
 
         this.rowsToErase    = [];
         this.rowsToAddNow   = 0;
@@ -500,6 +501,7 @@ class NTEngine
     {
         return {
             gameStatus:        this.gameStatus,
+            lastRequest:       this.lastRequest,
             lastRequestStatus: this.lastRequestStatus,
             currentLevel:      this.currentLevel,
             currentScore:      this.currentScore,
@@ -522,6 +524,7 @@ class NTEngine
     ntReset(gameLevel)
     {
         this.gameStatus        = NTEngine.GS_PLAY;
+        this.lastRequest       = NTEngine.GR_RESET;
         this.lastRequestStatus = NTEngine.LRS_ACCEPT;
         this.currentLevel      = gameLevel;
         this.currentScore      = 0;
@@ -831,11 +834,14 @@ class NTEngine
                 {
                     return this.ntStatus();
                 }
+
+                this.lastRequest = NTEngine.GR_NONE;
                 break;
 
             /********************************* Rotate Clockwise **********************************/
 
             case NTEngine.GR_ROTATE_CW:
+                this.lastRequest = NTEngine.GR_ROTATE_CW;
                 switch(this.pieceCurrent)
                 {
                     case NTEngine.PIECE_T:
@@ -971,6 +977,7 @@ class NTEngine
             /***************************** Rotate Counter Clockwise ******************************/
             
             case NTEngine.GR_ROTATE_CCW:
+                this.lastRequest = NTEngine.GR_ROTATE_CCW;
                 switch(this.pieceCurrent)
                 {
                     case NTEngine.PIECE_T:
@@ -1106,6 +1113,7 @@ class NTEngine
             /********************************* Move Piece Left **********************************/
 
             case NTEngine.GR_LEFT:
+                this.lastRequest = NTEngine.GR_LEFT;
                 //Make sure the game is playing.
                 if(this.gameStatus !== NTEngine.GS_PLAY)
                 {
@@ -1248,6 +1256,7 @@ class NTEngine
             /********************************* Move Piece Right **********************************/
 
             case NTEngine.GR_RIGHT:
+                this.lastRequest = NTEngine.GR_RIGHT;
                 //Make sure the game is playing.
                 if(this.gameStatus !== NTEngine.GS_PLAY)
                 {
@@ -1390,6 +1399,7 @@ class NTEngine
             /********************************** Move Piece Down **********************************/
 
             case NTEngine.GR_DOWN:
+                this.lastRequest = NTEngine.GR_DOWN;
                 //Make sure the game is playing.
                 if(this.gameStatus !== NTEngine.GS_PLAY)
                 {
@@ -1531,6 +1541,7 @@ class NTEngine
                 break;
 
             case NTEngine.GR_PAUSE:
+                this.lastRequest = NTEngine.GR_PAUSE;
                 if(this.gameStatus === NTEngine.GS_PLAY || this.gameStatus === NTEngine.GS_PAUSE)
                 {
                     
@@ -1556,7 +1567,7 @@ class NTEngine
 
             //This resumes gameplay after a piece has been glued to the play field.
             case NTEngine.GR_RESUME:
-
+                this.lastRequest = NTEngine.GR_RESUME;
                 //Resume the game after an animation wait.
                 if(this.gameStatus === NTEngine.GS_WAIT)
                 {
@@ -1596,6 +1607,7 @@ class NTEngine
                 break;
 
             case NTEngine.GR_RESUME_BLK:
+                this.lastRequest = NTEngine.GR_RESUME_BLK;
                 //Resume the game after a block animation wait.
                 if(this.gameStatus === NTEngine.GS_WAIT_BLK)
                 {
@@ -1619,6 +1631,7 @@ class NTEngine
                 break;
 
             case NTEngine.GR_ADD_LINES:
+                this.lastRequest = NTEngine.GR_ADD_LINES;
                 //The number of lines must be set.
                 let addParamInt = param;
 
@@ -1640,6 +1653,7 @@ class NTEngine
                 break;
 
             case NTEngine.GR_RESET:
+                this.lastRequest = NTEngine.GR_RESET;
                 //The level to start on must be set.
                 let paramInt = parseInt(param);
 
@@ -1654,6 +1668,7 @@ class NTEngine
 
             //This allows the RNG to be reseeded so all players have the same piece sequence.
             case NTEngine.GR_RESEED:
+                this.lastRequest = NTEngine.GR_RESEED;
                 let reseedParam = parseInt(param);
 
                 if(isNaN(param))
