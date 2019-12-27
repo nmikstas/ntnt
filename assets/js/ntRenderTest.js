@@ -207,6 +207,9 @@ let renderer = new NTRender(showStats);
 //Create a new game engine.
 ntEngine = new NTEngine(255000255, renderer.gfRender);
 
+//Used to hide play piece diring animations.
+let getField = () => {return ntEngine.ntGetGameField();}
+
 //----------------- Game Field ------------------
 //Get canvas to render the game field on.
 let canvas = document.getElementById("renderCanvas");

@@ -1,4 +1,3 @@
-
 class NTRender
 {
     constructor(statsCallback)
@@ -12,6 +11,15 @@ class NTRender
         this.pieceThird    = 0;
         this.gameStatus    = NTEngine.GS_OVER;
         this.cameraOffset  = 0;
+
+        //Animation variables.
+        this.rowsToErase   = [];
+        this.animCounter   = 0;
+        this.colorAdd      = .2;
+        this.alphaAdd      = .7;
+        this.clearedBlocks = [];
+        this.glueTimer;
+        this.animTimer;
 
         this.boxArr = []; //Array of all the game field pieces.
         this.npArr  = []; //Array of next piece boxes.
@@ -87,6 +95,44 @@ class NTRender
         ]
     }
 
+    /************************************ Animation Functions ************************************/
+
+    eraseAnim = () =>
+    {
+        //Finish up the animation.
+        if(this.animCounter >= 10)
+        {
+            ntEngine.ntRequest(NTEngine.GR_RESUME);
+            clearInterval(this.animTimer);
+            document.addEventListener('keydown', logKey);
+            document.addEventListener('keyup', doKeyUp);
+            document.addEventListener('keydown', doKeyDown);
+            this.animCounter   = 0;
+            this.colorAdd      = .2;
+            this.alphaAdd      = .7;
+            this.clearedBlocks = [];
+            return;
+        }
+
+        for(let i = 0; i < this.rowsToErase.length; i++)
+        {
+            this.clearedBlocks.push({ y: this.rowsToErase[i], x: this.animCounter });
+        }
+
+        this.alphaAdd -= .07;
+        this.colorAdd += .08;
+        this.animCounter++;
+    }
+
+    glueDelay = () =>
+    {
+        ntEngine.ntRequest(NTEngine.GR_RESUME);
+        clearInterval(this.glueTimer);
+        document.addEventListener('keydown', logKey);
+        document.addEventListener('keyup', doKeyUp);
+        document.addEventListener('keydown', doKeyDown);
+    }
+
     /************************************ Rendering Functions ************************************/
 
     //Render the play field.
@@ -98,13 +144,18 @@ class NTRender
         this.pieceCurrent = status.pieceCurrent;
         this.pieceNext    = status.pieceNext;
         this.pieceThird   = status.pieceThird;
+        this.rowsToErase  = status.rowsToErase;
+        let field = [];
+
+        //During animations, hide the piece at the top of the play field.
+        (this.gameStatus === NTEngine.GS_WAIT_BLK || this.gameStatus === NTEngine.GS_WAIT) ? field = getField() : field = status.gameField;
 
         //Need to make a deep copy of the array.
         for(let i = 0; i < this.renderFieldArr.length; i++)
         {
             for(let j = 0; j < this.renderFieldArr[i].length; j++)
             {
-                this.renderFieldArr[i][j] = status.gameField[i][j];
+                this.renderFieldArr[i][j] = field[i][j];
             }
         }
 
@@ -120,8 +171,23 @@ class NTRender
         //Check if animation wait state.
         if(gameStatus === NTEngine.GS_WAIT)
         {
-            ntEngine.ntRequest(NTEngine.GR_RESUME);
-        }
+            document.removeEventListener('keydown', logKey);
+            document.removeEventListener('keyup', doKeyUp);
+            document.removeEventListener('keydown', doKeyDown);
+            Key._pressed = [];
+
+            if(status.rowsToErase.length > 0)
+            {
+                clearInterval(this.animTimer);
+                this.animTimer = setInterval(() => {this.eraseAnim()}, 50);
+            }
+            else
+            {
+                clearInterval(this.glueTimer);
+                this.glueTimer = setInterval(() => {this.glueDelay()}, 100);
+            }
+            return;
+    }
 
         //Check if block add wait state,
         if(gameStatus === NTEngine.GS_WAIT_BLK)
@@ -163,6 +229,13 @@ class NTRender
         backMat.diffuseTexture = new BABYLON.Texture("https://nmikstas.github.io/resources/images/tetris2.png", scene);
         backMat.bumpTexture = new BABYLON.Texture("https://nmikstas.github.io/resources/images/tetris2n.png", scene);
         backMat.emissiveColor = new BABYLON.Color3(0, 0, 0);
+
+        //Special tetris material.
+        let tetrisMat = new BABYLON.StandardMaterial("tetrisMat", scene);
+        tetrisMat.diffuseTexture = new BABYLON.Texture("https://nmikstas.github.io/resources/images/tetris4.png", scene);
+        tetrisMat.bumpTexture = new BABYLON.Texture("https://nmikstas.github.io/resources/images/tetris4n.png", scene);
+        tetrisMat.emissiveColor = new BABYLON.Color3(.200*this.gm, .200*this.gm, .200*this.gm);
+        tetrisMat.alpha = .7;
 
         //Fill the materials array.
         for(let i = 0; i < 10; i++)
@@ -227,6 +300,30 @@ class NTRender
                     {
                         this.boxArr[i][j].isVisible = false;
                     }
+                }
+            }
+
+            //Special animation for 4 rows cleared.
+            if(this.rowsToErase.length === 4)
+            {
+                for(let i = 0; i < 4; i++)
+                {
+                    for(let j = 0; j < 10; j++)
+                    {
+                        this.boxArr[this.rowsToErase[i]][j].material = tetrisMat;
+                        this.boxArr[this.rowsToErase[i]][j].material.emissiveColor.r = this.colorAdd;
+                        this.boxArr[this.rowsToErase[i]][j].material.emissiveColor.g = this.colorAdd;
+                        this.boxArr[this.rowsToErase[i]][j].material.emissiveColor.b = this.colorAdd;
+                        this.boxArr[this.rowsToErase[i]][j].material.alpha = this.alphaAdd;
+                    }
+                }
+            }
+            else
+            {
+                //Erase any animation blocks.
+                for(let i = 0; i < this.clearedBlocks.length; i++)
+                {
+                    this.boxArr[this.clearedBlocks[i].y][this.clearedBlocks[i].x].isVisible = false;
                 }
             }
         });
