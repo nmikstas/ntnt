@@ -118,24 +118,6 @@ $( document ).ready(function()
         ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 5);
     });
 
-    $("#line-10").on("click", function()
-    {
-        //console.log("Add 10 lines");
-        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 10);
-    });
-
-    $("#line-18").on("click", function()
-    {
-        //console.log("Add 18 lines");
-        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 18);
-    });
-
-    $("#line-25").on("click", function()
-    {
-        //console.log("Add 25 lines");
-        ntEngine.ntRequest(NTEngine.GR_ADD_LINES, 25);
-    });
-
     $("#seed-btn").on("click", function(event)
     {
         event.preventDefault();

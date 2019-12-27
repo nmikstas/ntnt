@@ -15,11 +15,14 @@ class NTRender
         //Animation variables.
         this.rowsToErase   = [];
         this.animCounter   = 0;
+        this.blocksCounter = 0;
         this.colorAdd      = .2;
         this.alphaAdd      = .7;
         this.clearedBlocks = [];
+        this.blankBlocks   = [];
         this.glueTimer;
         this.animTimer;
+        this.blocksTimer;
 
         this.boxArr = []; //Array of all the game field pieces.
         this.npArr  = []; //Array of next piece boxes.
@@ -96,6 +99,24 @@ class NTRender
     }
 
     /************************************ Animation Functions ************************************/
+
+    addBlocksAnim = () =>
+    {
+        //Reset after add rows animation is complete.
+        if(this.blocksCounter >= this.blankBlocks.length)
+        {
+            ntEngine.ntRequest(NTEngine.GR_RESUME_BLK);
+            clearInterval(this.blocksTimer);
+            document.addEventListener('keydown', logKey);
+            document.addEventListener('keyup', doKeyUp);
+            document.addEventListener('keydown', doKeyDown);
+            this.blocksCounter = 0;
+            this.blankBlocks = [];
+            return;
+        }
+
+        this.blocksCounter++;
+    }
 
     eraseAnim = () =>
     {
@@ -187,7 +208,21 @@ class NTRender
                 this.glueTimer = setInterval(() => {this.glueDelay()}, 100);
             }
             return;
-    }
+        }
+
+        //Check if block add wait state,
+        if(gameStatus === NTEngine.GS_WAIT_BLK)
+        {
+            document.removeEventListener('keydown', logKey);
+            document.removeEventListener('keyup', doKeyUp);
+            document.removeEventListener('keydown', doKeyDown);
+            Key._pressed = [];
+
+            this.blankBlocks = status.blanks;
+            clearInterval(this.blocksTimer);
+            this.blocksTimer = setInterval(() => {this.addBlocksAnim()}, 50);
+            return;
+        }
 
         //Check if block add wait state,
         if(gameStatus === NTEngine.GS_WAIT_BLK)
@@ -283,16 +318,16 @@ class NTRender
         //This is where all the changes in the game happen.
         scene.registerBeforeRender(() =>
         {
-            light2.position = new BABYLON.Vector3(4.5 + 7 * Math.cos(this.lightOffset), 9.5 + 14 * Math.sin(this.lightOffset), 5);
+            let colorIndex    = this.currentLevel % 10;
+            light2.position   = new BABYLON.Vector3(4.5 + 7 * Math.cos(this.lightOffset), 9.5 + 14 * Math.sin(this.lightOffset), 5);
             this.lightOffset += .002;
-
+            
             for(let i = 0; i < this.boxArr.length; i++)
             {
                 for(let j = 0; j < this.boxArr[i].length; j++)
                 {
                     if(this.renderFieldArr[i][j])
                     {
-                        let colorIndex = this.currentLevel % 10;
                         this.boxArr[i][j].isVisible = true;
                         this.boxArr[i][j].material = this.matArr[colorIndex][this.renderFieldArr[i][j]];
                     }
@@ -324,6 +359,48 @@ class NTRender
                 for(let i = 0; i < this.clearedBlocks.length; i++)
                 {
                     this.boxArr[this.clearedBlocks[i].y][this.clearedBlocks[i].x].isVisible = false;
+                }
+            }
+
+            //Add blocks to the bottom of the game field animation.
+            for(let i = this.boxArr.length-1; i >= this.blocksCounter; i--)
+            {
+                for(let j = 0; j < 10; j++)
+                {
+                    this.boxArr[i][j].material  = this.boxArr[i-this.blocksCounter][j].material;
+                    this.boxArr[i][j].isVisible = this.boxArr[i-this.blocksCounter][j].isVisible;
+                }
+            }
+
+            //Build up the added blocks incrementally.
+            if(this.blankBlocks.length)
+            {   
+                let newBlocks = [];
+
+                //Copy only the blocks we need.
+                for(let i = 0; i < this.blocksCounter; i++)
+                {
+                    newBlocks.push(this.blankBlocks[i]);
+                }
+
+                //Reverse the new blocks array.
+                newBlocks.reverse();
+
+                for(let i = 0; i < this.blocksCounter; i++)
+                {
+                    for(let j = 0; j < 10; j++)
+                    {
+                        this.boxArr[i][j].material = this.matArr[colorIndex][4];
+
+                        if(j === newBlocks[i])
+                        {
+                            this.boxArr[i][j].isVisible = false;
+                        }
+                        else
+                        {
+                            this.boxArr[i][j].isVisible = true;
+                        }
+                    }
                 }
             }
         });
