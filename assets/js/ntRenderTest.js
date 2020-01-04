@@ -4,91 +4,15 @@ let ntEngine;
 
 let logKey = (e) =>
 {
-    if(e.key.toLowerCase() === "k" && !e.repeat)
-    {
-        //console.log("Rotate CCW");
-        ntEngine.ntRequest(NTEngine.GR_ROTATE_CCW);
-    }
-
-    if(e.key.toLowerCase() === "l" && !e.repeat)
-    {
-        //console.log("Rotate CW");
-        ntEngine.ntRequest(NTEngine.GR_ROTATE_CW);
-    }
-
-    if(e.key.toLowerCase() === "p" && !e.repeat)
-    {
-        //console.log("Toggle Pause");
-        ntEngine.ntRequest(NTEngine.GR_PAUSE);
-    }
-
     if(e.key.toLowerCase() === "r" && !e.repeat)
     {
         //console.log("Reset Game");
         ntEngine.ntRequest(NTEngine.GR_RESET, 0);
         isStarted = true;
     }
-
-    if(e.key === "ArrowLeft")
-    {
-        //console.log("Move Left");
-        ntEngine.ntRequest(NTEngine.GR_LEFT);
-    }
-
-    if(e.key === "ArrowRight")
-    {
-        //console.log("Move Right");
-        ntEngine.ntRequest(NTEngine.GR_RIGHT);
-    }
-}
-
-let Key =
-{
-    _pressed: {},
-  
-    LEFT:  37,
-    UP:    38,
-    RIGHT: 39,
-    DOWN:  40,
-    
-    isDown: function(keyCode)
-    {
-        return this._pressed[keyCode];
-    },
-    
-    onKeydown: function(event)
-    {
-        this._pressed[event.keyCode] = true;
-    },
-    
-    onKeyup: function(event)
-    {
-        delete this._pressed[event.keyCode];
-    }
-};
-
-let doKeyUp = function()
-{
-    Key.onKeyup(event);
-}
-
-let doKeyDown = function()
-{
-    Key.onKeydown(event);
 }
 
 document.addEventListener('keydown', logKey);
-document.addEventListener('keyup', doKeyUp);
-document.addEventListener('keydown', doKeyDown);
-
-//Special listener for key down.
-setInterval(function()
-{
-    if (Key.isDown(Key.DOWN))
-    {
-        ntEngine.ntRequest(NTEngine.GR_DOWN);
-    }
-}, 17);
 
 /*************************************** Button Listeners ****************************************/
 
@@ -181,6 +105,8 @@ let showStats = (level, score, lines, gameStatus, request) =>
     }
 }
 
+
+
 /*********************************** Game Engine And Renderer ************************************/
 
 //Create a new NT game renderer.
@@ -190,7 +116,66 @@ let renderer = new NTRender(showStats);
 ntEngine = new NTEngine(255000255, renderer.gfRender);
 
 //Used to hide play piece diring animations.
-let getField = () => {return ntEngine.ntGetGameField();}
+let getField = () => { return ntEngine.ntGetGameField(); }
+
+//Input control module.
+let input = new NTInput
+(
+    ntEngine.ntRequest,
+    //engineRequest, 
+    /*{
+        downBtn:   .14,
+        downIndex: 9,
+        downType:  NTInput.IT_GAMEPAD_DPAD,
+
+        cwBtn:     1,
+        cwIndex:   0,
+        cwType:    NTInput.IT_GAMEPAD_DIGITAL,
+
+        ccwBtn:     2,
+        ccwIndex:   0,
+        ccwType:    NTInput.IT_GAMEPAD_DIGITAL,
+
+        pauseBtn:   9,
+        pauseIndex: 0,
+        pauseType:  NTInput.IT_GAMEPAD_DIGITAL,
+
+        leftBtn:    .71,
+        leftIndex:  9,
+        leftType:   NTInput.IT_GAMEPAD_DPAD,
+
+        rightBtn:   -.43,
+        rightIndex: 9,
+        rightType:  NTInput.IT_GAMEPAD_DPAD,
+    }*/
+    {
+        downBtn:   13,
+        downIndex: 9,
+        downType:  NTInput.IT_GAMEPAD_DIGITAL,
+
+        cwBtn:     1,
+        cwIndex:   0,
+        cwType:    NTInput.IT_GAMEPAD_DIGITAL,
+
+        ccwBtn:     0,
+        ccwIndex:   0,
+        ccwType:    NTInput.IT_GAMEPAD_DIGITAL,
+
+        pauseBtn:   9,
+        pauseIndex: 0,
+        pauseType:  NTInput.IT_GAMEPAD_DIGITAL,
+
+        leftBtn:    14,
+        leftIndex:  9,
+        leftType:   NTInput.IT_GAMEPAD_DIGITAL,
+
+        rightBtn:   15,
+        rightIndex: 9,
+        rightType:  NTInput.IT_GAMEPAD_DIGITAL,
+    }
+);
+
+renderer.enableInputCallback = input.enableInputs;
 
 //----------------- Game Field ------------------
 //Get canvas to render the game field on.

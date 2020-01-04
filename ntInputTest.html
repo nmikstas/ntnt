@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>NTNT</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!--Reset Styling-->
+    <link rel="stylesheet" type="text/css" href="assets/css/reset.css">
+    
+    <!--Bootstrap-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    
+    <!--Personal Styling-->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+</head>
+    
+<body class="d-flex flex-column" id="main-body">
+    
+    <!--Header-->
+    <header class="header-class">
+        <div class="container text-center">
+            <h1>NTInput Testbench</h1>
+        </div>
+    </header>
+        
+    <!--Main content body-->
+    <div id="page-body" class="container pt-1 pl-1">
+        <div class="row">
+            <div class="col-md-6">
+                <h2 style="color: #ffffff;">Input Button Statuses</h2>
+                <span style="color: #ffffff;">Left: </span><span id="left-span" style="color: #ffffff;">-</span><br>
+                <span style="color: #ffffff;">Right: </span><span id="right-span" style="color: #ffffff;">-</span><br>
+                <span style="color: #ffffff;">Down: </span><span id="down-span" style="color: #ffffff;">-</span><br>
+                <span style="color: #ffffff;">Rotate CW: </span><span id="rotate-cw-span" style="color: #ffffff;">-</span><br>
+                <span style="color: #ffffff;">Rotate CCW: </span><span id="rotate-ccw-span" style="color: #ffffff;">-</span><br>
+                <span style="color: #ffffff;">Pause: </span><span id="pause-span" style="color: #ffffff;">-</span><br>
+            </div>
+
+            <div class="col-md-6">
+                <h2 style="color: #ffffff;">Input Button Selection</h2>
+            </div>
+        </div>
+    </div>
+        
+    <!--Footer-->
+    <footer id="sticky-footer" class="pt-4 pb-1">
+        <div class="container text-center">
+            <small>&copy;</small>
+        </div>
+    </footer>
+        
+    <!--jQuery-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        
+    <!--Bootstrap-->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <!--Javascript-->
+    <script src="assets/js/ntInput.js"></script>
+    <script src="assets/js/ntInputTest.js"></script>
+</body>
+        
+</html>

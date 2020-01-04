@@ -13,6 +13,7 @@ class NTRender
         this.lastStatus    = NTEngine.GS_OVER;
         this.cameraOffset  = 0;
         this.lastLevel     = -1;
+        this.enableInputCallback = null;
 
         //Animation variables.
         this.rowsToErase   = [];
@@ -120,9 +121,10 @@ class NTRender
         {
             ntEngine.ntRequest(NTEngine.GR_RESUME_BLK);
             clearInterval(this.blocksTimer);
-            document.addEventListener('keydown', logKey);
-            document.addEventListener('keyup', doKeyUp);
-            document.addEventListener('keydown', doKeyDown);
+            //document.addEventListener('keydown', logKey);
+            //document.addEventListener('keyup', doKeyUp);
+            //document.addEventListener('keydown', doKeyDown);
+            this.enableInputCallback(true);
             this.blocksCounter = 0;
             this.blankBlocks = [];
             return;
@@ -139,9 +141,10 @@ class NTRender
         {
             ntEngine.ntRequest(NTEngine.GR_RESUME);
             clearInterval(this.animTimer);
-            document.addEventListener('keydown', logKey);
-            document.addEventListener('keyup', doKeyUp);
-            document.addEventListener('keydown', doKeyDown);
+            //document.addEventListener('keydown', logKey);
+            //document.addEventListener('keyup', doKeyUp);
+            //document.addEventListener('keydown', doKeyDown);
+            this.enableInputCallback(true);
             this.animCounter   = 0;
             this.colorAdd      = .2;
             this.alphaAdd      = .7;
@@ -163,9 +166,10 @@ class NTRender
     {
         ntEngine.ntRequest(NTEngine.GR_RESUME);
         clearInterval(this.glueTimer);
-        document.addEventListener('keydown', logKey);
-        document.addEventListener('keyup', doKeyUp);
-        document.addEventListener('keydown', doKeyDown);
+        //document.addEventListener('keydown', logKey);
+        //document.addEventListener('keyup', doKeyUp);
+        //document.addEventListener('keydown', doKeyDown);
+        this.enableInputCallback(true);
     }
 
     /************************************ Rendering Functions ************************************/
@@ -283,10 +287,11 @@ class NTRender
         //Check if animation wait state.
         if(gameStatus === NTEngine.GS_WAIT)
         {
-            document.removeEventListener('keydown', logKey);
-            document.removeEventListener('keyup', doKeyUp);
-            document.removeEventListener('keydown', doKeyDown);
-            Key._pressed = [];
+            //document.removeEventListener('keydown', logKey);
+            //document.removeEventListener('keyup', doKeyUp);
+            //document.removeEventListener('keydown', doKeyDown);
+            //Key._pressed = [];
+            this.enableInputCallback(false);
 
             if(status.rowsToErase.length > 0)
             {
@@ -296,7 +301,7 @@ class NTRender
             else
             {
                 clearInterval(this.glueTimer);
-                this.glueTimer = setInterval(() => {this.glueDelay()}, 100);
+                this.glueTimer = setInterval(() => {this.glueDelay()}, 200);
             }
             return;
         }
@@ -304,10 +309,11 @@ class NTRender
         //Check if block add wait state,
         if(gameStatus === NTEngine.GS_WAIT_BLK)
         {
-            document.removeEventListener('keydown', logKey);
-            document.removeEventListener('keyup', doKeyUp);
-            document.removeEventListener('keydown', doKeyDown);
-            Key._pressed = [];
+            //document.removeEventListener('keydown', logKey);
+            //document.removeEventListener('keyup', doKeyUp);
+            //document.removeEventListener('keydown', doKeyDown);
+            //Key._pressed = [];
+            this.enableInputCallback(false);
 
             this.blankBlocks = status.blanks;
             clearInterval(this.blocksTimer);

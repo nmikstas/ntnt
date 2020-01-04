@@ -2,10 +2,6 @@ var gamepadAPI =
 {
     controller: {},
     turbo: false,
-    connect: function() {},
-    disconnect: function() {},
-    update: function() {},
-    buttons: [],
     buttonsCache: [],
     buttonsStatus: [],
     axesStatus: [],

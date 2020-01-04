@@ -824,7 +824,7 @@ class NTEngine
     }
 
     //Used by outside code to make a request of the NT engine.
-    ntRequest(request, param)
+    ntRequest = (request, param) =>
     {
         switch(request)
         {
