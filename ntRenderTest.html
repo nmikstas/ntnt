@@ -33,13 +33,23 @@
                 <canvas id="renderCanvas" touch-action="none"></canvas>
             </div>
             <div class="col-md-6">
-                <h4>Next Piece:</h4>
-                <canvas id="pieceCanvas" touch-action="none"></canvas>
-                <h4 class="mt-2" id="h-score">Score: -</h4>
-                <h4 id="h-level">Level: -</h4>
-                <h4 id="h-lines">Lines: -</h4>
+                <div class="row no-gutters">
+                    <div class="col-md-6">
+                        <h4>Next Piece:</h4>
+                        <canvas id="pieceCanvas" touch-action="none"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <br>
+                        <h4 id="h-score">Score: -</h4>
+                        <h4 id="h-level">Level: -</h4>
+                        <h4 id="h-lines">Lines: -</h4>
+                    </div>
+                </div>
+                
                 <h4 id="h-status">Game Status: -</h4>
                 <h4 id="h-request">Last Request: -</h4>
+                <button type="button" id="start-btn" class="btn btn-success m-2">Start/Reset Game</button>
+
                 <div class="border">
                     <h4 class="m-2">Add Lines to Play Field</h4>
                     <button type="button" id="line-23" class="btn btn-primary m-2">Add .23 Lines</button>
@@ -47,6 +57,7 @@
                     <button type="button" id="line-2" class="btn btn-primary m-2">Add 2 Lines</button>
                     <button type="button" id="line-5" class="btn btn-primary m-2">Add 5 Lines</button>
                 </div>
+                
                 <div class="border mt-2">
                     <h4 class="m-2">Reseed RNG</h4>
                     <form>
@@ -56,6 +67,8 @@
                         </div>
                     </form>
                 </div>
+
+                
             </div>
         </div>
     </div>

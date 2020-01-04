@@ -1,23 +1,15 @@
 let ntEngine;
 
-/**************************************** Keyboard Input *****************************************/
-
-let logKey = (e) =>
-{
-    if(e.key.toLowerCase() === "r" && !e.repeat)
-    {
-        //console.log("Reset Game");
-        ntEngine.ntRequest(NTEngine.GR_RESET, 0);
-        isStarted = true;
-    }
-}
-
-document.addEventListener('keydown', logKey);
-
 /*************************************** Button Listeners ****************************************/
 
 $( document ).ready(function()
 {
+    $("#start-btn").on("click", function()
+    {
+        ntEngine.ntRequest(NTEngine.GR_RESET, 0);
+        isStarted = true;
+    });
+
     $("#line-23").on("click", function()
     {
         //console.log("Add .23 line");
@@ -105,8 +97,6 @@ let showStats = (level, score, lines, gameStatus, request) =>
     }
 }
 
-
-
 /*********************************** Game Engine And Renderer ************************************/
 
 //Create a new NT game renderer.
@@ -115,7 +105,7 @@ let renderer = new NTRender(showStats);
 //Create a new game engine.
 ntEngine = new NTEngine(255000255, renderer.gfRender);
 
-//Used to hide play piece diring animations.
+//Used to hide play piece during animations.
 let getField = () => { return ntEngine.ntGetGameField(); }
 
 //Input control module.
@@ -175,6 +165,7 @@ let input = new NTInput
     }
 );
 
+//Allows inputs to be disabled during animations.
 renderer.enableInputCallback = input.enableInputs;
 
 //----------------- Game Field ------------------
@@ -208,9 +199,3 @@ npEngine.runRenderLoop(function () { npScene.render(); });
 
 //Watch for browser/canvas resize events.
 window.addEventListener("resize", function () { npEngine.resize(); });
-
-
-
-
-
-

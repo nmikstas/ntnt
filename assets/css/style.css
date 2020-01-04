@@ -25,7 +25,7 @@ h4
     font-size: 20px;
     color: #ffffff;
     text-align: left;
-    margin-bottom: 20px;
+    margin-bottom: 2px;
 }
 
 h5
@@ -144,7 +144,17 @@ footer
 {
     height: calc(100vh - 175px);
     width:  calc(50vh);
-    /*width: 375px;*/
-    /*height: 750px;*/
     touch-action: none;
+}
+
+#pieceCanvas
+{
+    height: 125px;
+    width:  250px;
+    touch-action: none;
+}
+
+#start-btn
+{
+    width: 100%;
 }

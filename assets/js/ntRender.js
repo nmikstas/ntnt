@@ -121,9 +121,6 @@ class NTRender
         {
             ntEngine.ntRequest(NTEngine.GR_RESUME_BLK);
             clearInterval(this.blocksTimer);
-            //document.addEventListener('keydown', logKey);
-            //document.addEventListener('keyup', doKeyUp);
-            //document.addEventListener('keydown', doKeyDown);
             this.enableInputCallback(true);
             this.blocksCounter = 0;
             this.blankBlocks = [];
@@ -141,9 +138,6 @@ class NTRender
         {
             ntEngine.ntRequest(NTEngine.GR_RESUME);
             clearInterval(this.animTimer);
-            //document.addEventListener('keydown', logKey);
-            //document.addEventListener('keyup', doKeyUp);
-            //document.addEventListener('keydown', doKeyDown);
             this.enableInputCallback(true);
             this.animCounter   = 0;
             this.colorAdd      = .2;
@@ -166,9 +160,6 @@ class NTRender
     {
         ntEngine.ntRequest(NTEngine.GR_RESUME);
         clearInterval(this.glueTimer);
-        //document.addEventListener('keydown', logKey);
-        //document.addEventListener('keyup', doKeyUp);
-        //document.addEventListener('keydown', doKeyDown);
         this.enableInputCallback(true);
     }
 
@@ -287,10 +278,6 @@ class NTRender
         //Check if animation wait state.
         if(gameStatus === NTEngine.GS_WAIT)
         {
-            //document.removeEventListener('keydown', logKey);
-            //document.removeEventListener('keyup', doKeyUp);
-            //document.removeEventListener('keydown', doKeyDown);
-            //Key._pressed = [];
             this.enableInputCallback(false);
 
             if(status.rowsToErase.length > 0)
@@ -309,10 +296,6 @@ class NTRender
         //Check if block add wait state,
         if(gameStatus === NTEngine.GS_WAIT_BLK)
         {
-            //document.removeEventListener('keydown', logKey);
-            //document.removeEventListener('keyup', doKeyUp);
-            //document.removeEventListener('keydown', doKeyDown);
-            //Key._pressed = [];
             this.enableInputCallback(false);
 
             this.blankBlocks = status.blanks;

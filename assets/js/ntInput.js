@@ -27,22 +27,22 @@ class NTInput
     (
         ntEngineCallback,
         { 
-            leftBtn    = 37,
+            leftBtn    = 37, //Left arrow
             leftIndex  = 0,
             leftType   = NTInput.IT_KEYBOARD,
-            rightBtn   = 39,
+            rightBtn   = 39, //Right arrow
             rightIndex = 0,
             rightType  = NTInput.IT_KEYBOARD,
-            downBtn    = 40,
+            downBtn    = 40, //Down arrow
             downIndex  = 0,
             downType   = NTInput.IT_KEYBOARD,
-            cwBtn      = 76,
+            cwBtn      = 76, //L button
             cwIndex    = 0,
             cwType     = NTInput.IT_KEYBOARD,
-            ccwBtn     = 75,
+            ccwBtn     = 75, //K button
             ccwIndex   = 0,
             ccwType    = NTInput.IT_KEYBOARD,
-            pauseBtn   = 80,
+            pauseBtn   = 80, //P button
             pauseIndex = 0,
             pauseType  = NTInput.IT_KEYBOARD
         } = {}
@@ -99,16 +99,10 @@ class NTInput
         this.init();
     }
 
+    //Used to keep the input module from sending requests out during animations.
     enableInputs = (en) =>
     {
-        if(en)
-        {
-            this.enableOutput = true;
-        }
-        else
-        {
-            this.enableOutput = false;
-        }
+        en ? this.enableOutput = true : this.enableOutput = false;
     }
 
     connect = (evt) =>
