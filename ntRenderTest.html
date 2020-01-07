@@ -48,7 +48,7 @@
                 
                 <h4 id="h-status">Game Status: -</h4>
                 <h4 id="h-request">Last Request: -</h4>
-                <button type="button" id="start-btn" class="btn btn-success m-2">Start/Reset Game</button>
+                <button type="button" id="start-btn" class="btn btn-success mb-2">Start/Reset Game</button>
 
                 <div class="border">
                     <h4 class="m-2">Add Lines to Play Field</h4>
@@ -68,7 +68,94 @@
                     </form>
                 </div>
 
-                
+                <div class="border mt-2">
+                    <h4 class="m-2">Configure Input</h4>
+                    
+                    <div class="row no-gutters">
+                        <div class="col-md-6 pl-2">
+                            <div class="row no-gutters">
+                                <div class="col-md-7">
+                                    <span style="color: #000000;">Down: </span>
+                                    <span id="down-input" style="color: #ffffff;">Key 40</span>
+                                    <div id="down-status" style="color: #0000ff;">Ready</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="button" id="down-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 pl-2">
+                            <div class="row no-gutters">
+                                <div class="col-md-7">
+                                    <span style="color: #000000;">Pause: </span>
+                                    <span id="pause-input" style="color: #ffffff;">Key 80</span>
+                                    <div id="pause-status" style="color: #0000ff;">Ready</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="button" id="pause-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters">
+                        <div class="col-md-6 pl-2">
+                            <div class="row no-gutters">
+                                <div class="col-md-7">
+                                    <span style="color: #000000;">Rotate CW: </span>
+                                    <span id="rotate-cw-input" style="color: #ffffff;">Key 76</span>
+                                    <div id="rotate-cw-status" style="color: #0000ff;">Ready</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="button" id="rotate-cw-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 pl-2">
+                            <div class="row no-gutters">
+                                <div class="col-md-7">
+                                    <span style="color: #000000;">Rotate CCW: </span>
+                                    <span id="rotate-ccw-input" style="color: #ffffff;">Key 75</span>
+                                    <div id="rotate-ccw-status" style="color: #0000ff;">Ready</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="button" id="rotate-ccw-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters">
+                        <div class="col-md-6 pl-2">
+                            <div class="row no-gutters">
+                                <div class="col-md-7">
+                                    <span style="color: #000000;">Left: </span>
+                                    <span id="left-input" style="color: #ffffff;">Key 37</span>
+                                    <div id="left-status" style="color: #0000ff;">Ready</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="button" id="left-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 pl-2">
+                            <div class="row no-gutters">
+                                <div class="col-md-7">
+                                    <span style="color: #000000;">Right: </span>
+                                    <span id="right-input" style="color: #ffffff;">Key 39</span>
+                                    <div id="right-status" style="color: #0000ff;">Ready</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="button" id="right-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>

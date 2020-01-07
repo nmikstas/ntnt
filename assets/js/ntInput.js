@@ -96,6 +96,11 @@ class NTInput
         this.leftTimer  = 0;
         this.rightTimer = 0;
 
+        //Input configuration variables.
+        this.configTimer;
+        this.configButton;
+        this.configCallback;
+
         this.init();
     }
 
@@ -117,6 +122,219 @@ class NTInput
         this.turbo = false;
         delete this.controller;
         if(this.debug)console.log('Gamepad disconnected.');
+        this.dPads       = [];
+        this.firstUpdate = true;
+    }
+
+    //Change one of the input values.
+    setInput = (input, value, index, type) =>
+    {
+        switch(input)
+        {
+            case NTInput.IN_LEFT:
+                this.leftBtn   = value;
+                this.leftIndex = index;
+                this.leftType  = type;
+                break;
+            case NTInput.IN_RIGHT:
+                this.rightBtn   = value;
+                this.rightIndex = index;
+                this.rightType  = type;
+                break;
+            case NTInput.IN_ROTATE_CW:
+                this.cwBtn   = value;
+                this.cwIndex = index;
+                this.cwType  = type;
+                break;
+            case NTInput.IN_ROTATE_CCW:
+                this.ccwBtn   = value;
+                this.ccwIndex = index;
+                this.ccwType  = type;
+                break;
+            case NTInput.IN_DOWN:
+                this.downBtn   = value;
+                this.downIndex = index;
+                this.downType  = type;
+                break;
+            default:
+                this.pauseBtn   = value;
+                this.pauseIndex = index;
+                this.pauseType  = type;
+                break;
+        }
+    }
+
+    //Need to make sure inputs are not already being used.
+    checkInput = (input, value, index, type) =>
+    {
+        let isUsed = false;
+        if(input !== NTInput.IN_LEFT)
+        {
+            if(value === this.leftBtn && index === this.leftIndex && type === this.leftType)
+            {
+                isUsed = true;
+            }
+        }
+
+        if(input !== NTInput.IN_RIGHT)
+        {
+            if(value === this.rightBtn && index === this.rightIndex && type === this.rightType)
+            {
+                isUsed = true;
+            }
+        }
+
+        if(input !== NTInput.IN_DOWN)
+        {
+            if(value === this.downBtn && index === this.downIndex && type === this.downType)
+            {
+                isUsed = true;
+            }
+        }
+
+        if(input !== NTInput.IN_ROTATE_CW)
+        {
+            if(value === this.cwBtn && index === this.cwIndex && type === this.cwType)
+            {
+                isUsed = true;
+            }
+        }
+
+        if(input !== NTInput.IN_ROTATE_CCW)
+        {
+            if(value === this.ccwBtn && index === this.ccwIndex && type === this.ccwType)
+            {
+                isUsed = true;
+            }
+        }
+
+        if(input !== NTInput.IN_PAUSE)
+        {
+            if(value === this.pauseBtn && index === this.pauseIndex && type === this.pauseType)
+            {
+                isUsed = true;
+            }
+        }
+
+        return isUsed;
+    }
+
+    //This function runs periodically when a player is changing an input mapping.
+    configChecker = () =>
+    {
+        //We need to check the following arrays: buttonsStatus, axesStatus, keysPressed and dPads.
+        
+        //Check keyboard.
+        let thisKey = Object.keys(this.keysPressed)
+        if(thisKey.length)
+        {
+            let pushedKey = thisKey[0];
+            let status = true;
+
+            //Check that input is not already being used and then set the new input.
+            if(!this.checkInput(this.configButton, parseInt(pushedKey), 0, NTInput.IT_KEYBOARD))
+            {
+                this.setInput(this.configButton, pushedKey, 0, NTInput.IT_KEYBOARD);
+                status = false;
+            }
+            
+            clearInterval(this.configTimer);
+            this.enableOutput = true;
+            return this.configCallback(this.configButton, NTInput.IT_KEYBOARD, pushedKey, status);
+        }
+
+        //Check gamepad buttons.
+        if(this.buttonsStatus.length)
+        {
+            let pushedButton = this.buttonsStatus[0];
+            let status = true;
+
+            //Check that input is not already being used and then set the new input.
+            if(!this.checkInput(this.configButton, pushedButton, 0, NTInput.IT_GAMEPAD_DIGITAL))
+            {
+                this.setInput(this.configButton, pushedButton, 0, NTInput.IT_GAMEPAD_DIGITAL);
+                status = false;
+            }
+
+            clearInterval(this.configTimer);
+            this.enableOutput = true;
+            return this.configCallback(this.configButton, NTInput.IT_GAMEPAD_DIGITAL, pushedButton, status);
+        }
+
+        //Check analog sticks.
+        if(this.axesStatus.length)
+        {
+            let status = true;
+
+            for(let i = 0; i < this.axesStatus.length; i++)
+            {
+                if(parseFloat(this.axesStatus[i]) >= .50 && parseFloat(this.axesStatus[i]) <= 1.00 && !this.dPads[i])
+                {
+                    //Check that input is not already being used and then set the new input.
+                    if(!this.checkInput(this.configButton, .50, i, NTInput.IT_GAMEPAD_ANALOG))
+                    {
+                        this.setInput(this.configButton, .50, i, NTInput.IT_GAMEPAD_ANALOG);
+                        status = false;
+                    }
+
+                    clearInterval(this.configTimer);
+                    this.enableOutput = true;
+                    return this.configCallback(this.configButton, NTInput.IT_GAMEPAD_ANALOG, .50, status);
+                }
+
+                if(parseFloat(this.axesStatus[i]) <= -.50 && parseFloat(this.axesStatus[i]) >= -1.00 && !this.dPads[i])
+                {
+                    //Check that input is not already being used and then set the new input.
+                    if(!this.checkInput(this.configButton, -.50, i, NTInput.IT_GAMEPAD_ANALOG))
+                    {
+                        this.setInput(this.configButton, -.50, i, NTInput.IT_GAMEPAD_ANALOG);
+                        status = false;
+                    }
+
+                    clearInterval(this.configTimer);
+                    this.enableOutput = true;
+                    return this.configCallback(this.configButton, NTInput.IT_GAMEPAD_ANALOG, -.50, status);
+                }                
+            }
+        }
+        
+        //Check D pad.
+        if(this.axesStatus.length)
+        {
+            let status = true;
+
+            for(let i = 0; i < this.axesStatus.length; i++)
+            {
+                if(parseFloat(this.axesStatus[i]) <= 1.00 && parseFloat(this.axesStatus[i]) >= -1.00 && this.dPads[i])
+                {
+                    //Check that input is not already being used and then set the new input.
+                    if(!this.checkInput(this.configButton, parseFloat(this.axesStatus[i]), i, NTInput.IT_GAMEPAD_DPAD))
+                    {
+                        this.setInput(this.configButton, parseFloat(this.axesStatus[i]), i, NTInput.IT_GAMEPAD_DPAD);
+                        status = false;
+                    }
+
+                    clearInterval(this.configTimer);
+                    this.enableOutput = true;
+                    return this.configCallback(this.configButton, NTInput.IT_GAMEPAD_DPAD, parseFloat(this.axesStatus[i]), status);
+                }              
+            }
+        }
+    }
+
+    configInput = (button, configCallback) =>
+    {
+        this.configButton = button;
+        this.configCallback = configCallback;
+        this.enableOutput = false;
+        clearInterval(this.configTimer);
+        this.configTimer = setInterval(() => this.configChecker(), 17);
+    }
+
+    cancelConfig = () =>
+    {
+        clearInterval(this.configTimer);
+        this.enableOutput = true;
     }
 
     onKeydown = (event) =>

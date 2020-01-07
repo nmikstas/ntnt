@@ -842,6 +842,13 @@ class NTEngine
 
             case NTEngine.GR_ROTATE_CW:
                 this.lastRequest = NTEngine.GR_ROTATE_CW;
+                //Make sure the game is playing.
+                if(this.gameStatus !== NTEngine.GS_PLAY)
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    break;
+                }
+                
                 switch(this.pieceCurrent)
                 {
                     case NTEngine.PIECE_T:
@@ -978,6 +985,13 @@ class NTEngine
             
             case NTEngine.GR_ROTATE_CCW:
                 this.lastRequest = NTEngine.GR_ROTATE_CCW;
+                //Make sure the game is playing.
+                if(this.gameStatus !== NTEngine.GS_PLAY)
+                {
+                    this.lastRequestStatus = NTEngine.LRS_REJECT;
+                    break;
+                }
+
                 switch(this.pieceCurrent)
                 {
                     case NTEngine.PIECE_T:
