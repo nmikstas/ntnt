@@ -79,7 +79,7 @@ $(document).ready(function()
         console.log(input.axesStatus);
         console.log(input.keysPressed);
         console.log(input.dPads);
-        console.log("******************")
+        console.log("******************");
 
         $("#down-span").text("-");
         $("#rotate-cw-span").text("-");

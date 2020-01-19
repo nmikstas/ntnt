@@ -381,7 +381,18 @@ class NTInput
         this.buttonsStatus = [];
 
         //Get the gamepad object
-        let c = this.controller || {};
+        //let c = this.controller || {};
+        let c =
+        {
+            buttons: [],
+            axes: []
+        }
+
+        if(navigator.getGamepads()[0])
+        {
+            c = navigator.getGamepads()[0];
+        }
+        
       
         //Loop through buttons and push the pressed ones to the array
         let pressed = [];
