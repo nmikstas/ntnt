@@ -1589,7 +1589,7 @@ class NTEngine
                     this.removeLines();
 
                     //Check if lines need to be added.
-                    if(this.rowsToAddTotal > 0)
+                    if(this.rowsToAddTotal > 0 && this.gameStatus !== NTEngine.GS_OVER)
                     {
                         this.rowsToAddNow = parseInt(this.rowsToAddTotal);
                         this.rowsToAddTotal -= this.rowsToAddNow;

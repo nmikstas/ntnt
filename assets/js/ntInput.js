@@ -339,7 +339,11 @@ class NTInput
 
     onKeydown = (event) =>
     {
-        this.keysPressed[event.keyCode] = true;
+        //Make sure values are not beign added in twice.  Will lock up the keys!
+        if(!this.keysPressed[event.keyCode])
+        {
+            this.keysPressed[event.keyCode] = true;
+        }
     }
     
     onKeyup = (event) =>
@@ -357,12 +361,19 @@ class NTInput
         this.onKeydown(event);
     }
 
+    //Do this to prevent keys from locking up if user changes tabs.
+    changeFocus = () =>
+    {
+        this.keysPressed = [];
+    }
+
     init = () =>
     {
         window.addEventListener("gamepadconnected", this.connect);
         window.addEventListener("gamepaddisconnected", this.disconnect);
         document.addEventListener('keyup', this.doKeyUp);
         document.addEventListener('keydown', this.doKeyDown);
+        window.addEventListener('focus', this.changeFocus);
         setInterval(() => { this.update() }, 17);
     }
 
@@ -381,7 +392,6 @@ class NTInput
         this.buttonsStatus = [];
 
         //Get the gamepad object
-        //let c = this.controller || {};
         let c =
         {
             buttons: [],
