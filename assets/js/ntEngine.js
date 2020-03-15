@@ -142,7 +142,7 @@ class NTEngine
     static get PIECE_L()   { return 5 };
     static get PIECE_I()   { return 6 };
 
-    constructor(rndSeed, statusCallback)
+    constructor(rndSeed, statusCallback, currentLevel = 0)
     {
         this.statusCallback = statusCallback;
 
@@ -157,7 +157,7 @@ class NTEngine
         this.gameStatus        = NTEngine.GS_OVER;
         this.lastRequest       = NTEngine.GR_NONE;
         this.lastRequestStatus = NTEngine.LRS_NONE;
-        this.currentLevel      = 0;
+        this.currentLevel      = currentLevel;
         this.currentScore      = 0;
         this.linesCleared      = 0;
 
@@ -526,7 +526,7 @@ class NTEngine
         this.gameStatus        = NTEngine.GS_PLAY;
         this.lastRequest       = NTEngine.GR_RESET;
         this.lastRequestStatus = NTEngine.LRS_ACCEPT;
-        this.currentLevel      = gameLevel;
+        this.currentLevel      = parseInt(gameLevel);
         this.currentScore      = 0;
         this.linesCleared      = 0;
         this.rowsToErase       = [];
@@ -646,15 +646,15 @@ class NTEngine
         }
         else if(this.rowsToErase.length === 2)
         {
-            this.currentScore += 100 * (this.currentLevel + 1);
+            this.currentScore += (100 * (this.currentLevel + 1));
         }
         else if(this.rowsToErase.length === 3)
         {
-            this.currentScore += 300 * (this.currentLevel + 1);
+            this.currentScore += (300 * (this.currentLevel + 1));
         }
         else if(this.rowsToErase.length === 4)
         {
-            this.currentScore += 1200 * (this.currentLevel + 1);
+            this.currentScore += (1200 * (this.currentLevel + 1));
         }
 
         this.linesCleared += this.rowsToErase.length;
@@ -824,7 +824,7 @@ class NTEngine
     }
 
     //Used by outside code to make a request of the NT engine.
-    ntRequest = (request, param) =>
+    ntRequest(request, param)
     {
         switch(request)
         {

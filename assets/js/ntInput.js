@@ -105,19 +105,19 @@ class NTInput
     }
 
     //Used to keep the input module from sending requests out during animations.
-    enableInputs = (en) =>
+    enableInputs(en)
     {
         en ? this.enableOutput = true : this.enableOutput = false;
     }
 
-    connect = (evt) =>
+    connect(evt)
     {
         this.controller = evt.gamepad;
         this.turbo = true;
         if(this.debug)console.log('Gamepad connected.');
     }
 
-    disconnect = (evt) =>
+    disconnect(evt)
     {
         this.turbo = false;
         delete this.controller;
@@ -127,7 +127,7 @@ class NTInput
     }
 
     //Change one of the input values.
-    setInput = (input, value, index, type) =>
+    setInput(input, value, index, type)
     {
         switch(input)
         {
@@ -165,7 +165,7 @@ class NTInput
     }
 
     //Need to make sure inputs are not already being used.
-    checkInput = (input, value, index, type) =>
+    checkInput(input, value, index, type)
     {
         let isUsed = false;
         if(input !== NTInput.IN_LEFT)
@@ -220,7 +220,7 @@ class NTInput
     }
 
     //This function runs periodically when a player is changing an input mapping.
-    configChecker = () =>
+    configChecker()
     {
         //We need to check the following arrays: buttonsStatus, axesStatus, keysPressed and dPads.
         
@@ -322,7 +322,7 @@ class NTInput
         }
     }
 
-    configInput = (button, configCallback) =>
+    configInput(button, configCallback)
     {
         this.configButton = button;
         this.configCallback = configCallback;
@@ -331,13 +331,13 @@ class NTInput
         this.configTimer = setInterval(() => this.configChecker(), 17);
     }
 
-    cancelConfig = () =>
+    cancelConfig()
     {
         clearInterval(this.configTimer);
         this.enableOutput = true;
     }
 
-    onKeydown = (event) =>
+    onKeydown(event)
     {
         //Make sure values are not beign added in twice.  Will lock up the keys!
         if(!this.keysPressed[event.keyCode])
@@ -346,38 +346,38 @@ class NTInput
         }
     }
     
-    onKeyup = (event) =>
+    onKeyup(event)
     {
         delete this.keysPressed[event.keyCode];
     }
 
-    doKeyUp = () =>
+    doKeyUp(event)
     {
         this.onKeyup(event);
     }
 
-    doKeyDown = () =>
+    doKeyDown(event)
     {
         this.onKeydown(event);
     }
 
     //Do this to prevent keys from locking up if user changes tabs.
-    changeFocus = () =>
+    changeFocus()
     {
         this.keysPressed = [];
     }
 
-    init = () =>
+    init()
     {
-        window.addEventListener("gamepadconnected", this.connect);
-        window.addEventListener("gamepaddisconnected", this.disconnect);
-        document.addEventListener('keyup', this.doKeyUp);
-        document.addEventListener('keydown', this.doKeyDown);
-        window.addEventListener('focus', this.changeFocus);
+        window.addEventListener("gamepadconnected", (event) => this.connect(event));
+        window.addEventListener("gamepaddisconnected", (event) => this.disconnect(event));
+        document.addEventListener('keyup', (event) => this.doKeyUp(event));
+        document.addEventListener('keydown', (event) => this.doKeyDown(event));
+        window.addEventListener('focus', () => this.changeFocus());
         setInterval(() => { this.update() }, 17);
     }
 
-    update = () =>
+    update()
     {
         //Clear the buttons cache
         this.buttonsCache = [];
@@ -452,7 +452,7 @@ class NTInput
         this.updateButtonPresses();
     }
 
-    updateNoRetrigger = (type, button, state, index, input) =>
+    updateNoRetrigger(type, button, state, index, input)
     {
         switch(type)
         {
@@ -546,7 +546,7 @@ class NTInput
         return state;
     }
 
-    updateDelayedRetrigger = (type, button, state, index, input, timer) =>
+    updateDelayedRetrigger(type, button, state, index, input, timer)
     {
         let stateReturn = 
         {
@@ -654,7 +654,7 @@ class NTInput
         };  
     }
 
-    updateButtonPresses = () =>
+    updateButtonPresses()
     {
         //Exit if the output is not enabled. This is used when reconfiguring keys.
         if(!this.enableOutput) return;

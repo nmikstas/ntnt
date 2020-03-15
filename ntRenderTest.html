@@ -21,9 +21,41 @@
     
     <!--Header-->
     <header class="header-class">
-        <div class="container text-center">
-            <h1>NTRender Testbench</h1>
-        </div>
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand nav-title px-2" href="https://nmikstas.github.io/portfolio/">Nick Mikstas Portfolio</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="container">
+                <h1>NT 3D Render Testbench</h1>
+            </div>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://nmikstas.github.io/portfolio/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://nmikstas.github.io/portfolio/resume.html">Resume</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://nmikstas.github.io/portfolio/web.html">Web</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://nmikstas.github.io/portfolio/embedded.html">Embedded</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://nmikstas.github.io/portfolio/fpga.html">FPGA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://nmikstas.github.io/portfolio/dsp.html">DSP</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://nmikstas.github.io/portfolio/games.html">Games</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
     </header>
         
     <!--Main content body-->
@@ -35,52 +67,92 @@
             <div class="col-md-6">
                 <div class="row no-gutters">
                     <div class="col-md-6">
-                        <h4>Next Piece:</h4>
+                        <h4 class="small-text">Next Piece:</h4>
                         <canvas id="pieceCanvas" touch-action="none"></canvas>
                     </div>
                     <div class="col-md-6">
                         <br>
-                        <h4 id="h-score">Score: -</h4>
-                        <h4 id="h-level">Level: -</h4>
-                        <h4 id="h-lines">Lines: -</h4>
+                        <h4 id="h-score" class="small-text">Score: -</h4>
+                        <h4 id="h-level" class="small-text">Level: -</h4>
+                        <h4 id="h-lines" class="small-text">Lines: -</h4>
+                        <button type="button" id="start-btn" class="btn btn-success mt-2 small-text">Start/Reset Game</button>
                     </div>
                 </div>
                 
-                <h4 id="h-status">Game Status: -</h4>
-                <h4 id="h-request">Last Request: -</h4>
-                <button type="button" id="start-btn" class="btn btn-success mb-2">Start/Reset Game</button>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 id="h-status" class="small-text">Game Status: -</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 id="h-request" class="small-text">Last Request: -</h4>
+                    </div>
+                </div>
 
                 <div class="border">
-                    <h4 class="m-2">Add Lines to Play Field</h4>
-                    <button type="button" id="line-23" class="btn btn-primary m-2">Add .23 Lines</button>
-                    <button type="button" id="line-1" class="btn btn-primary m-2">Add 1 Line</button>
-                    <button type="button" id="line-2" class="btn btn-primary m-2">Add 2 Lines</button>
-                    <button type="button" id="line-5" class="btn btn-primary m-2">Add 5 Lines</button>
+                    <h4 class="mx-2 mt-2 mb-2 small-text">Start Level</h4>
+                    <div class="card"><div class="img-container selected-img-container small-text" id="0">0</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="1">1</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="2">2</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="3">3</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="4">4</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="5">5</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="6">6</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="7">7</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="8">8</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="9">9</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="10">10</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="11">11</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="12">12</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="13">13</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="14">14</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="15">15</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="16">16</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="17">17</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="18">18</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="19">19</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="20">20</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="21">21</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="22">22</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="23">23</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="24">24</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="25">25</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="26">26</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="27">27</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="28">28</div></div>
+                    <div class="card"><div class="img-container notSelected-img-container small-text" id="29">29</div></div>
+                </div>
+
+                <div class="border mt-2">
+                    <h4 class="m-2 small-text">Add Lines to Play Field</h4>
+                    <button type="button" id="line-23" class="btn btn-primary mx-2 mb-2 small-text">Add .23 Lines</button>
+                    <button type="button" id="line-1" class="btn btn-primary mx-2 mb-2 small-text">Add 1 Line</button>
+                    <button type="button" id="line-2" class="btn btn-primary mx-2 mb-2 small-text">Add 2 Lines</button>
+                    <button type="button" id="line-5" class="btn btn-primary mx-2 mb-2 small-text">Add 5 Lines</button>
                 </div>
                 
                 <div class="border mt-2">
-                    <h4 class="m-2">Reseed RNG</h4>
+                    <h4 class="mx-2 mt-2 small-text">Reseed RNG</h4>
                     <form>
-                        <div class="input-group mt-2 p-2">
+                        <div class="input-group p-2">
                             <input type="text" class="form-control" id="seed-text" placeholder="Enter seed value">
-                            <input type="submit" class="btn btn-success m-2" id="seed-btn" value="Reseed">
+                            <input type="submit" class="btn btn-success mx-2 small-text" id="seed-btn" value="Reseed">
                         </div>
                     </form>
                 </div>
 
                 <div class="border mt-2">
-                    <h4 class="m-2">Configure Input</h4>
+                    <h4 class="mx-2 mt-2 small-text">Configure Input</h4>
                     
                     <div class="row no-gutters">
                         <div class="col-md-6 pl-2">
                             <div class="row no-gutters">
                                 <div class="col-md-7">
-                                    <span style="color: #000000;">Down: </span>
-                                    <span id="down-input" style="color: #ffffff;">Key 40</span>
-                                    <div id="down-status" style="color: #0000ff;">Ready</div>
+                                    <span class="small-text" style="color: #000000;">Down: </span>
+                                    <span class="small-text" id="down-input" style="color: #ffffff;">Key 40</span>
+                                    <div class="small-text" id="down-status" style="color: #0000ff;">Ready</div>
                                 </div>
                                 <div class="col-md-5">
-                                    <button type="button" id="down-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                    <button type="button" id="down-btn" data="change" class="btn btn-primary m-2 config small-text">Change</button>
                                 </div>
                             </div>
                         </div>
@@ -88,12 +160,12 @@
                         <div class="col-md-6 pl-2">
                             <div class="row no-gutters">
                                 <div class="col-md-7">
-                                    <span style="color: #000000;">Pause: </span>
-                                    <span id="pause-input" style="color: #ffffff;">Key 80</span>
-                                    <div id="pause-status" style="color: #0000ff;">Ready</div>
+                                    <span class="small-text" style="color: #000000;">Pause: </span>
+                                    <span class="small-text" id="pause-input" style="color: #ffffff;">Key 80</span>
+                                    <div class="small-text" id="pause-status" style="color: #0000ff;">Ready</div>
                                 </div>
                                 <div class="col-md-5">
-                                    <button type="button" id="pause-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                    <button type="button" id="pause-btn" data="change" class="btn btn-primary m-2 config small-text">Change</button>
                                 </div>
                             </div>
                         </div>
@@ -103,12 +175,12 @@
                         <div class="col-md-6 pl-2">
                             <div class="row no-gutters">
                                 <div class="col-md-7">
-                                    <span style="color: #000000;">Spin CW: </span>
-                                    <span id="rotate-cw-input" style="color: #ffffff;">Key 76</span>
-                                    <div id="rotate-cw-status" style="color: #0000ff;">Ready</div>
+                                    <span class="small-text" style="color: #000000;">Spin CW: </span>
+                                    <span class="small-text" id="rotate-cw-input" style="color: #ffffff;" class="small-text">Key 76</span>
+                                    <div class="small-text" id="rotate-cw-status" style="color: #0000ff;" class="small-text">Ready</div>
                                 </div>
                                 <div class="col-md-5">
-                                    <button type="button" id="rotate-cw-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                    <button type="button" id="rotate-cw-btn" data="change" class="btn btn-primary m-2 config small-text">Change</button>
                                 </div>
                             </div>
                         </div>
@@ -116,12 +188,12 @@
                         <div class="col-md-6 pl-2">
                             <div class="row no-gutters">
                                 <div class="col-md-7">
-                                    <span style="color: #000000;">Spin CCW: </span>
-                                    <span id="rotate-ccw-input" style="color: #ffffff;">Key 75</span>
-                                    <div id="rotate-ccw-status" style="color: #0000ff;">Ready</div>
+                                    <span class="small-text" style="color: #000000;">Spin CCW: </span>
+                                    <span class="small-text" id="rotate-ccw-input" style="color: #ffffff;">Key 75</span>
+                                    <div class="small-text" id="rotate-ccw-status" style="color: #0000ff;">Ready</div>
                                 </div>
                                 <div class="col-md-5">
-                                    <button type="button" id="rotate-ccw-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                    <button type="button" id="rotate-ccw-btn" data="change" class="btn btn-primary m-2 config small-text">Change</button>
                                 </div>
                             </div>
                         </div>
@@ -131,12 +203,12 @@
                         <div class="col-md-6 pl-2">
                             <div class="row no-gutters">
                                 <div class="col-md-7">
-                                    <span style="color: #000000;">Left: </span>
-                                    <span id="left-input" style="color: #ffffff;">Key 37</span>
-                                    <div id="left-status" style="color: #0000ff;">Ready</div>
+                                    <span class="small-text" style="color: #000000;">Left: </span>
+                                    <span class="small-text" id="left-input" style="color: #ffffff;">Key 37</span>
+                                    <div class="small-text" id="left-status" style="color: #0000ff;">Ready</div>
                                 </div>
                                 <div class="col-md-5">
-                                    <button type="button" id="left-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                    <button type="button" id="left-btn" data="change" class="btn btn-primary m-2 config small-text">Change</button>
                                 </div>
                             </div>
                         </div>
@@ -144,26 +216,35 @@
                         <div class="col-md-6 pl-2">
                             <div class="row no-gutters">
                                 <div class="col-md-7">
-                                    <span style="color: #000000;">Right: </span>
-                                    <span id="right-input" style="color: #ffffff;">Key 39</span>
-                                    <div id="right-status" style="color: #0000ff;">Ready</div>
+                                    <span class="small-text" style="color: #000000;">Right: </span>
+                                    <span class="small-text" id="right-input" style="color: #ffffff;">Key 39</span>
+                                    <div class="small-text" id="right-status" style="color: #0000ff;">Ready</div>
                                 </div>
                                 <div class="col-md-5">
-                                    <button type="button" id="right-btn" data="change" class="btn btn-primary m-2 config">Change</button>
+                                    <button type="button" id="right-btn" data="change" class="btn btn-primary m-2 config small-text">Change</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <div class="mx-2 small-text">
+                        Default Inputs
+                    </div>
+
+                    <div class="mx-2 small-text">
+                        Move Left: Arrow Left, Move Right: Arrow Right, Move Down: Arrow Down,
+                        Reset/Start Game: R, Rotate CCW: K, Rotate CW: L, Pause Game: P 
+                    </div>
+                   
                 </div>
             </div>
         </div>
     </div>
         
     <!--Footer-->
-    <footer id="sticky-footer" class="pt-4 pb-1">
+    <footer id="sticky-footer" class="pt-4 pb-1 text-white-50">
         <div class="container text-center">
-            <small>&copy;</small>
+            <small>&copy; Nick Mikstas - nmikstas@alumni.scu.edu</small>
         </div>
     </footer>
         

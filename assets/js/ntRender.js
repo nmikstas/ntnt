@@ -1,6 +1,6 @@
 class NTRender
 {
-    constructor(statsCallback)
+    constructor(statsCallback, useEngine = true)
     {
         this.statsCallback = statsCallback; //Callback used for displaying the game stats.
         this.gm            = 1.5;           //Glow multiplier.
@@ -14,7 +14,10 @@ class NTRender
         this.cameraOffset  = 0;
         this.lastLevel     = -1;
         this.enableInputCallback = null;
-
+        this.useEngine     = useEngine;
+        this.getField;
+        this.ntEngine;
+        
         //Animation variables.
         this.rowsToErase   = [];
         this.animCounter   = 0;
@@ -114,12 +117,12 @@ class NTRender
 
     /************************************ Animation Functions ************************************/
 
-    addBlocksAnim = () =>
+    addBlocksAnim()
     {
         //Reset after add rows animation is complete.
-        if(this.blocksCounter >= this.blankBlocks.length)
+        if(this.blocksCounter >= this.blankBlocks.length  && this.useEngine)
         {
-            ntEngine.ntRequest(NTEngine.GR_RESUME_BLK);
+            this.ntEngine.ntRequest(NTEngine.GR_RESUME_BLK);
             clearInterval(this.blocksTimer);
             this.enableInputCallback(true);
             this.blocksCounter = 0;
@@ -131,12 +134,12 @@ class NTRender
         this.blocksCounter++;
     }
 
-    eraseAnim = () =>
+    eraseAnim()
     {
         //Finish up the animation.
-        if(this.animCounter >= 10)
+        if(this.animCounter >= 10 && this.useEngine)
         {
-            ntEngine.ntRequest(NTEngine.GR_RESUME);
+            this.ntEngine.ntRequest(NTEngine.GR_RESUME);
             clearInterval(this.animTimer);
             this.enableInputCallback(true);
             this.animCounter   = 0;
@@ -156,17 +159,20 @@ class NTRender
         this.animCounter++;
     }
 
-    glueDelay = () =>
+    glueDelay()
     {
-        ntEngine.ntRequest(NTEngine.GR_RESUME);
-        clearInterval(this.glueTimer);
-        this.enableInputCallback(true);
+        if(this.useEngine)
+        {
+            this.ntEngine.ntRequest(NTEngine.GR_RESUME);
+            clearInterval(this.glueTimer);
+            this.enableInputCallback(true);
+        }
     }
 
     /************************************ Rendering Functions ************************************/
 
     //Render the play field.
-    gfRender = (status) =>
+    gfRender(status)
     {
         //Copy variables needed to run the game.
         this.gameStatus        = status.gameStatus;
@@ -255,7 +261,21 @@ class NTRender
         this.lastStatus = this.gameStatus;
 
         //During animations, hide the piece at the top of the play field.
-        (this.gameStatus === NTEngine.GS_WAIT_BLK || this.gameStatus === NTEngine.GS_WAIT) ? field = getField() : field = status.gameField;
+        if(this.gameStatus === NTEngine.GS_WAIT_BLK || this.gameStatus === NTEngine.GS_WAIT)
+        {
+            if(this.useEngine)
+            {
+                field = this.getField();
+            }
+            else
+            {
+                field = status.gameField;
+            }
+        }
+        else
+        {
+            field = status.gameField;
+        }
 
         //Need to make a deep copy of the array.
         for(let i = 0; i < this.renderFieldArr.length; i++)
@@ -276,7 +296,7 @@ class NTRender
         this.statsCallback(level, score, lines, gameStatus, request);
 
         //Check if animation wait state.
-        if(gameStatus === NTEngine.GS_WAIT)
+        if(gameStatus === NTEngine.GS_WAIT && this.useEngine)
         {
             this.enableInputCallback(false);
 
@@ -294,7 +314,7 @@ class NTRender
         }
 
         //Check if block add wait state,
-        if(gameStatus === NTEngine.GS_WAIT_BLK)
+        if(gameStatus === NTEngine.GS_WAIT_BLK  && this.useEngine)
         {
             this.enableInputCallback(false);
 
@@ -307,14 +327,17 @@ class NTRender
         //Check if block add wait state,
         if(gameStatus === NTEngine.GS_WAIT_BLK)
         {
-            ntEngine.ntRequest(NTEngine.GR_RESUME_BLK);
+            if(this.useEngine)
+            {
+                this.ntEngine.ntRequest(NTEngine.GR_RESUME_BLK);
+            }
         }
     }
 
     /********************************** Main Babylon Functions ***********************************/
 
     //This function renders the game field.
-    gfCreateScene = () =>
+    gfCreateScene(engine, canvas)
     {
         //Create the scene space
         let scene = new BABYLON.Scene(engine);
@@ -398,16 +421,19 @@ class NTRender
             this.matArr.push(matRow);
         }
 
-        //Add background blocks to the scene.
-        for(let i = 0; i < 10; i++)
+        var backOptions =
         {
-            for(let j = 0; j < 20; j++)
-            {
-                let bkBox = BABYLON.MeshBuilder.CreateBox("box" + i + j, {height: 1, width: 1, depth: 1}, scene);
-                bkBox.position = new BABYLON.Vector3(i, j, -1);
-                bkBox.material = backMat;
-            }
-        }
+            width:     10,
+            height:    20,
+            depth:     1,
+		    tileSize:  1,
+		    tileWidth: 1
+        };
+
+        let bkBox = BABYLON.MeshBuilder.CreateTiledPlane("background", backOptions, scene);
+        bkBox.position = new BABYLON.Vector3(4.5, 9.5, -0.5);
+        bkBox.material = backMat;
+        bkBox.rotation.y = Math.PI;
 
         //Add foreground blocks to the scene.
         for(let i = 0; i < 20; i++)
@@ -539,7 +565,7 @@ class NTRender
             {
                 plane.isVisible = false;
             }
-
+            
             //Special animation for 4 rows cleared.
             if(this.rowsToErase.length === 4)
             {
@@ -611,7 +637,7 @@ class NTRender
     };
 
     //This function renders the next piece.
-    npCreateScene = () =>
+    npCreateScene(npEngine)
     {
         //Create the scene space
         let scene = new BABYLON.Scene(npEngine);

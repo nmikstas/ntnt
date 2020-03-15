@@ -2,6 +2,8 @@ let ntEngine;
 let ntRenderer;
 let ntInput;
 let configCallback;
+let startLevel = 0;
+let selectedId = 0;
 
 /*************************************** Button Listeners ****************************************/
 
@@ -9,7 +11,7 @@ $( document ).ready(function()
 {
     $("#start-btn").on("click", function()
     {
-        ntEngine.ntRequest(NTEngine.GR_RESET, 0);
+        ntEngine.ntRequest(NTEngine.GR_RESET, startLevel);
         isStarted = true;
     });
 
@@ -47,6 +49,18 @@ $( document ).ready(function()
 
         console.log("Reseed Value: " + seedValue);
         ntEngine.ntRequest(NTEngine.GR_RESEED, seedValue);
+    });
+
+    $(".img-container").on("click", function()
+    {
+        startLevel = $(this).attr("id");
+        $("#" + selectedId).removeClass("selected-img-container");
+        $("#" + selectedId).addClass("notSelected-img-container");
+        selectedId = $(this).attr("id");
+        $(this).removeClass("notSelected-img-container");
+        $(this).addClass("selected-img-container");
+
+        console.log(startLevel)
     });
 
     $(".config").on("click", function(event)
@@ -237,8 +251,65 @@ let showStats = (level, score, lines, gameStatus, request) =>
     }
 }
 
+
+let renderHandler = (status) =>
+{
+    ntRenderer.gfRender(status);
+}
+
 /*********************************** Game Engine And Renderer ************************************/
 
+//Create a new NT game renderer.
+ntRenderer = new NTRender(showStats);
+
+//Create a new game engine.
+ntEngine = new NTEngine(123456789, renderHandler);
+
+//Tie the renderer to the game engine.
+ntRenderer.ntEngine = ntEngine;
+
+//Used to hide play piece during animations.
+ntRenderer.getField = () => { return ntEngine.ntGetGameField(); }
+
+//Input control module.
+ntInput = new NTInput((request, param) => ntEngine.ntRequest(request, param));
+
+//Allows inputs to be disabled during animations.
+ntRenderer.enableInputCallback = (en) => {ntInput.enableInputs(en)};
+
+//----------------- Game Field ------------------
+//Get canvas to render the game field on.
+let canvas = document.getElementById("renderCanvas");
+
+//Create a new babylon engine.
+let engine = new BABYLON.Engine(canvas, true);
+
+//Call the createScene function.
+let scene = ntRenderer.gfCreateScene(engine, canvas);
+
+//Register a Babylon render loop to repeatedly render the scene.
+engine.runRenderLoop(function () { scene.render(); });
+
+//Watch for browser/canvas resize events.
+window.addEventListener("resize", function () { engine.resize(); });
+
+//----------------- Next Piece ------------------
+//Get canvas to render the next piece on.
+let npCanvas = document.getElementById("pieceCanvas");
+
+//Create a new babylon engine.
+let npEngine = new BABYLON.Engine(npCanvas, true);
+
+//Call the createScene function.
+let npScene = ntRenderer.npCreateScene(npEngine);
+
+//Register a Babylon render loop to repeatedly render the scene.
+npEngine.runRenderLoop(function () { npScene.render(); });
+
+//Watch for browser/canvas resize events.
+window.addEventListener("resize", function () { npEngine.resize(); });
+
+/*
 //Create a new NT game renderer.
 ntRenderer = new NTRender(showStats);
 
@@ -249,62 +320,7 @@ ntEngine = new NTEngine(255000255, ntRenderer.gfRender);
 let getField = () => { return ntEngine.ntGetGameField(); }
 
 //Input control module.
-ntInput = new NTInput
-(
-    ntEngine.ntRequest,
-    //Homemade controller.
-    /*{
-        downBtn:   .14,
-        downIndex: 9,
-        downType:  NTInput.IT_GAMEPAD_DPAD,
-
-        cwBtn:     1,
-        cwIndex:   0,
-        cwType:    NTInput.IT_GAMEPAD_DIGITAL,
-
-        ccwBtn:     2,
-        ccwIndex:   0,
-        ccwType:    NTInput.IT_GAMEPAD_DIGITAL,
-
-        pauseBtn:   9,
-        pauseIndex: 0,
-        pauseType:  NTInput.IT_GAMEPAD_DIGITAL,
-
-        leftBtn:    .71,
-        leftIndex:  9,
-        leftType:   NTInput.IT_GAMEPAD_DPAD,
-
-        rightBtn:   -.43,
-        rightIndex: 9,
-        rightType:  NTInput.IT_GAMEPAD_DPAD,
-    }*/
-    //XBox one controller.
-    /*{
-        downBtn:   13,
-        downIndex: 9,
-        downType:  NTInput.IT_GAMEPAD_DIGITAL,
-
-        cwBtn:     1,
-        cwIndex:   0,
-        cwType:    NTInput.IT_GAMEPAD_DIGITAL,
-
-        ccwBtn:     0,
-        ccwIndex:   0,
-        ccwType:    NTInput.IT_GAMEPAD_DIGITAL,
-
-        pauseBtn:   9,
-        pauseIndex: 0,
-        pauseType:  NTInput.IT_GAMEPAD_DIGITAL,
-
-        leftBtn:    14,
-        leftIndex:  9,
-        leftType:   NTInput.IT_GAMEPAD_DIGITAL,
-
-        rightBtn:   15,
-        rightIndex: 9,
-        rightType:  NTInput.IT_GAMEPAD_DIGITAL,
-    }*/
-);
+ntInput = new NTInput(ntEngine.ntRequest);
 
 //Allows inputs to be disabled during animations.
 ntRenderer.enableInputCallback = ntInput.enableInputs;
@@ -340,3 +356,4 @@ npEngine.runRenderLoop(function () { npScene.render(); });
 
 //Watch for browser/canvas resize events.
 window.addEventListener("resize", function () { npEngine.resize(); });
+*/
